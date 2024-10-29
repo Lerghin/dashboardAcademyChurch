@@ -7,19 +7,33 @@ import Image from "next/image"
 import Link from "next/link"
 
 type Subject = {
-    id: number;
-    name: string;
-    teachers: string[];
+    idCurso: string;
+    nombreCurso: string;
+    professor: string;
+    fecha_inicio: string;
+    fecha_fin:string;
   };
   
   const columns = [
     {
-      header: "Subject Name",
-      accessor: "name",
+      header: "Nombre del Curso",
+      accessor: "nombreCurso",
+    },
+    
+    {
+      header: "Profesor",
+      accessor: "profesor",
+      className: "hidden md:table-cell",
+    },
+    
+    {
+      header: "Fecha de Inicio",
+      accessor: "fecha_inicio",
+      className: "hidden md:table-cell",
     },
     {
-      header: "Teachers",
-      accessor: "teachers",
+      header: "Fecha de Finalizacion",
+      accessor: "fecha_fin",
       className: "hidden md:table-cell",
     },
     {
@@ -31,17 +45,17 @@ type Subject = {
   const SubjectListPage = () => {
     const renderRow = (item: Subject) => (
       <tr
-        key={item.id}
+        key={item.idCurso}
         className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-lamaPurpleLight"
       >
-        <td className="flex items-center gap-4 p-4">{item.name}</td>
-        <td className="hidden md:table-cell">{item.teachers.join(",")}</td>
+        <td className="flex items-center gap-4 p-4">{item.nombreCurso}</td>
+        <td className="hidden md:table-cell">{item.professor}</td>
         <td>
           <div className="flex items-center gap-2">
             {role === "admin" && (
               <>
                 <FormModal table="subject" type="update" data={item} />
-                <FormModal table="subject" type="delete" id={item.id} />
+                <FormModal table="subject" type="delete" id={item.idCurso} />
               </>
             )}
           </div>

@@ -89,7 +89,7 @@ type Event = {
           </div>
         </div>
         {/* LIST */}
-        <Table columns={columns} renderRow={renderRow} data={eventsData} />
+        <Table colums={columns} renderRow={renderRow} data={eventsData} />
         {/* PAGINATION */}
         <Pagination />
       </div>
