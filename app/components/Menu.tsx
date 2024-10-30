@@ -14,7 +14,7 @@ const menuItems = [
       },
       {
         icon: "/teacher.png",
-        label: "Teachers",
+        label: "Profesores",
         href: "/dashboard/list/teachers",
         visible: ["admin", "teacher"],
       },
@@ -26,13 +26,13 @@ const menuItems = [
       },
       {
         icon: "/parent.png",
-        label: "Parents",
-        href: "/dashboard/list/parents",
+        label: "Grupos",
+        href: "/dashboard/list/groups",
         visible: ["admin", "teacher"],
       },
       {
         icon: "/subject.png",
-        label: "Subjects",
+        label: "Cursos",
         href: "/dashboard/list/subjects",
         visible: ["admin"],
       },
