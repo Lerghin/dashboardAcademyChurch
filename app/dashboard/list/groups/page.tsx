@@ -45,7 +45,7 @@ const columns = [
 const GroupsListPage = async () => {
     const response = await fetch(`${API_URL}grupo/get`, { cache: "no-store" });
     const groupsData: Groups[] = await response.json()
-
+    console.log(groupsData)
     const renderRow = (item: Groups) => (
 
         <tr key={item.idGrupo} className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-lamaPurpleLight  ">
