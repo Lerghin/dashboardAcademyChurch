@@ -38,7 +38,7 @@ const menuItems = [
       },
       {
         icon: "/result.png",
-        label: "Resultadoss",
+        label: "Resultados",
         href: "/dashboard/list/results",
         visible: ["admin", "teacher", "student", "parent"],
       },

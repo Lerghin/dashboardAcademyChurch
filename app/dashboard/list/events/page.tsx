@@ -54,7 +54,7 @@ const EventListPage = async () => {
         </div>
       </td>
       <td className="hidden md:table-cell">{item.description}</td>
-      <td className="hidden md:table-cell text-center">{item.fecha_inicio}</td>
+      <td className="hidden md:table-cell text-left">{item.fecha_inicio}</td>
     
       <td>
         <div className="flex items-center gap-2">
