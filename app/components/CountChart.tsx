@@ -6,8 +6,20 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import { API_URL } from "../lib/config";
+
+type dataPercentage ={
+  total: number;
+  countMen: number;
+  countWomen: number;
+  fillWomen: string;
+  fillMen: string;
+  fillTot: string;
+  porcentWomen: number;
+porcenMen: number;
 
 
+}
 const data = [
   {
     name: "Total",
@@ -26,12 +38,15 @@ const data = [
   },
 ];
 
-const CountChart = () => {
+const CountChart = async () => {
+  const response = await fetch(`${API_URL}miembro/get/percent`, { cache: "no-store" });// Usa `no-store` si quieres evitar el almacenamiento en caché
+  const porcentData:  dataPercentage[] = await response.json()
+  console.log(porcentData)
   return (
     <div className="bg-white rounded-xl w-full h-full p-4">
       {/* TITLE */}
       <div className="flex justify-between items-center">
-        <h1 className="text-lg font-semibold">Students</h1>
+        <h1 className="text-lg font-semibold">Miembros</h1>
         <Image src="/moreDark.png" alt="" width={20} height={20} />
       </div>
       {/* CHART */}
