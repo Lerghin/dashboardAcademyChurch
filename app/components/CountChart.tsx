@@ -1,4 +1,5 @@
 "use client";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import {
   RadialBarChart,
@@ -8,7 +9,8 @@ import {
 } from "recharts";
 import { API_URL } from "../lib/config";
 
-type dataPercentage ={
+// Define the type for the data structure returned from the API
+type DataPercentage = {
   total: number;
   countMen: number;
   countWomen: number;
@@ -16,32 +18,59 @@ type dataPercentage ={
   fillMen: string;
   fillTot: string;
   porcentWomen: number;
-porcenMen: number;
+  porcenMen: number;
+};
 
+const CountChart = () => {
+  // Initialize state variables for storing data
+  const [data, setData] = useState<any[]>([]);
+  const [porcent, setPorcent] = useState<{ porcentWomen: number; porcenMen: number }>({
+    porcentWomen: 0,
+    porcenMen: 0,
+  });
+  const [loading, setLoading] = useState(true);
 
-}
-const data = [
-  {
-    name: "Total",
-    count: 106,
-    fill: "white",
-  },
-  {
-    name: "Girls",
-    count: 53,
-    fill: "#FAE27C",
-  },
-  {
-    name: "Boys",
-    count: 53,
-    fill: "#C3EBFA",
-  },
-];
+  // Fetch data on component mount
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await fetch(`${API_URL}miembro/get/percent`, { cache: "no-store" });
+      const porcentData: DataPercentage = await response.json();
+      console.log(porcentData);
 
-const CountChart = async () => {
-  const response = await fetch(`${API_URL}miembro/get/percent`, { cache: "no-store" });// Usa `no-store` si quieres evitar el almacenamiento en caché
-  const porcentData:  dataPercentage[] = await response.json()
-  console.log(porcentData)
+      // Dynamically populate the data for the chart
+      setData([
+        {
+          name: "Total",
+          count: porcentData.total,
+          fill: porcentData.fillTot,
+        },
+        {
+          name: "Girls",
+          count: porcentData.countWomen,
+          fill: porcentData.fillWomen,
+        },
+        {
+          name: "Boys",
+          count: porcentData.countMen,
+          fill: porcentData.fillMen,
+        },
+      ]);
+      setPorcent({
+        porcentWomen: porcentData.porcentWomen,
+        porcenMen: porcentData.porcenMen,
+      });
+
+      setLoading(false);
+    };
+
+    fetchData();
+  }, []);
+
+  // If loading, show a loading message or spinner
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="bg-white rounded-xl w-full h-full p-4">
       {/* TITLE */}
@@ -49,6 +78,7 @@ const CountChart = async () => {
         <h1 className="text-lg font-semibold">Miembros</h1>
         <Image src="/moreDark.png" alt="" width={20} height={20} />
       </div>
+
       {/* CHART */}
       <div className="relative w-full h-[75%]">
         <ResponsiveContainer>
@@ -71,17 +101,18 @@ const CountChart = async () => {
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
         />
       </div>
+
       {/* BOTTOM */}
       <div className="flex justify-center gap-16">
         <div className="flex flex-col gap-1">
           <div className="w-5 h-5 bg-lamaSky rounded-full" />
-          <h1 className="font-bold">1,234</h1>
-          <h2 className="text-xs text-gray-300">Boys (55%)</h2>
+          <h1 className="font-bold">{data[2]?.count}</h1>
+          <h2 className="text-xs text-gray-300">{porcent.porcenMen}% Hombres</h2>
         </div>
         <div className="flex flex-col gap-1">
           <div className="w-5 h-5 bg-lamaYellow rounded-full" />
-          <h1 className="font-bold">1,234</h1>
-          <h2 className="text-xs text-gray-300">Girls (45%)</h2>
+          <h1 className="font-bold">{data[1]?.count}</h1>
+          <h2 className="text-xs text-gray-300">{porcent.porcentWomen}% Mujeres</h2>
         </div>
       </div>
     </div>
