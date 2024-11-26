@@ -49,9 +49,9 @@ const menuItems = [
         visible: ["admin", "teacher", "student", "parent"],
       },
       {
-        icon: "/message.png",
-        label: "Messages",
-        href: "/dashboard/list/messages",
+        icon: "/finance.png",
+        label: "Pagos",
+        href: "/dashboard/list/pago",
         visible: ["admin", "teacher", "student", "parent"],
       },
     ],
@@ -59,18 +59,7 @@ const menuItems = [
   {
     title: "OTHER",
     items: [
-      {
-        icon: "/profile.png",
-        label: "Profile",
-        href: "/profile",
-        visible: ["admin", "teacher", "student", "parent"],
-      },
-      {
-        icon: "/setting.png",
-        label: "Settings",
-        href: "/settings",
-        visible: ["admin", "teacher", "student", "parent"],
-      },
+    
       {
         icon: "/logout.png",
         label: "Logout",

@@ -1,4 +1,4 @@
-import Announcements from "@/app/components/Announcements"
+
 import BigCalendar from "@/app/components/BigCalender"
 import EventCalendar from "@/app/components/EventCalendar"
 
@@ -19,7 +19,7 @@ const TeacherPage = () => {
             </div>
             {/*Right*/}
             <div className="w-full xl:w-1/3 flex flex-col gap-8">
-                <Announcements />
+            
             </div>
 
         </div>

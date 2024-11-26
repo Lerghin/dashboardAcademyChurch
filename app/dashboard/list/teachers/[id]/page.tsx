@@ -1,170 +1,70 @@
-import Announcements from "@/app/components/Announcements"
-import BigCalendar from "@/app/components/BigCalender"
-import FormModal from "@/app/components/FormModal"
-import Performance from "@/app/components/Performance"
-import Image from "next/image"
-import Link from "next/link"
-import { role } from "@/app/lib/data"
+'use client'
 
+import { API_URL } from '@/app/lib/config';
+import { useParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
-const SingleTeacherPage = () => {
+export default function SingleProfessorPage() {
+  const { id } = useParams<string>();
+  const [data, setData] = useState(null);
+  const [error, setError] = useState(null);
 
-    return (
-        <div className="flex-1 p-4 flex flex-col gap-4 xl:flex-row">
-        {/* LEFT */}
-        <div className="w-full xl:w-2/3">
-          {/* TOP */}
-          <div className="flex flex-col lg:flex-row gap-4">
-            {/* USER INFO CARD */}
-            <div className="bg-lamaSky py-6 px-4 rounded-md flex-1 flex gap-4">
-              <div className="w-1/3">
-                <Image
-                  src="https://images.pexels.com/photos/2182970/pexels-photo-2182970.jpeg?auto=compress&cs=tinysrgb&w=1200"
-                  alt=""
-                  width={144}
-                  height={144}
-                  className="w-36 h-36 rounded-full object-cover"
-                />
-              </div>
-              <div className="w-2/3 flex flex-col justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <h1 className="text-xl font-semibold">Leonard Snyder</h1>
-                  {role === "admin" && <FormModal
-                    table="teacher"
-                    type="update"
-                    data={{
-                      id: 1,
-                      username: "deanguerrero",
-                      email: "deanguerrero@gmail.com",
-                      password: "password",
-                      firstName: "Dean",
-                      lastName: "Guerrero",
-                      phone: "+1 234 567 89",
-                      address: "1234 Main St, Anytown, USA",
-                      bloodType: "A+",
-                      dateOfBirth: "2000-01-01",
-                      sex: "male",
-                      img: "https://images.pexels.com/photos/2182970/pexels-photo-2182970.jpeg?auto=compress&cs=tinysrgb&w=1200",
-                    }}
-                  />}
-                </div>
-                <p className="text-sm text-gray-500">
-                  Lorem ipsum, dolor sit amet consectetur adipisicing elit.
-                </p>
-                <div className="flex items-center justify-between gap-2 flex-wrap text-xs font-medium">
-                  <div className="w-full md:w-1/3 lg:w-full 2xl:w-1/3 flex items-center gap-2">
-                    <Image src="/blood.png" alt="" width={14} height={14} />
-                    <span>A+</span>
-                  </div>
-                  <div className="w-full md:w-1/3 lg:w-full 2xl:w-1/3 flex items-center gap-2">
-                    <Image src="/date.png" alt="" width={14} height={14} />
-                    <span>January 2025</span>
-                  </div>
-                  <div className="w-full md:w-1/3 lg:w-full 2xl:w-1/3 flex items-center gap-2">
-                    <Image src="/mail.png" alt="" width={14} height={14} />
-                    <span>user@gmail.com</span>
-                  </div>
-                  <div className="w-full md:w-1/3 lg:w-full 2xl:w-1/3 flex items-center gap-2">
-                    <Image src="/phone.png" alt="" width={14} height={14} />
-                    <span>+1 234 567</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            {/* SMALL CARDS */}
-            <div className="flex-1 flex gap-4 justify-between flex-wrap">
-              {/* CARD */}
-              <div className="bg-white p-4 rounded-md flex gap-4 w-full md:w-[48%] xl:w-[45%] 2xl:w-[48%]">
-                <Image
-                  src="/singleAttendance.png"
-                  alt=""
-                  width={24}
-                  height={24}
-                  className="w-6 h-6"
-                />
-                <div className="">
-                  <h1 className="text-xl font-semibold">90%</h1>
-                  <span className="text-sm text-gray-400">Attendance</span>
-                </div>
-              </div>
-              {/* CARD */}
-              <div className="bg-white p-4 rounded-md flex gap-4 w-full md:w-[48%] xl:w-[45%] 2xl:w-[48%]">
-                <Image
-                  src="/singleBranch.png"
-                  alt=""
-                  width={24}
-                  height={24}
-                  className="w-6 h-6"
-                />
-                <div className="">
-                  <h1 className="text-xl font-semibold">2</h1>
-                  <span className="text-sm text-gray-400">Branches</span>
-                </div>
-              </div>
-              {/* CARD */}
-              <div className="bg-white p-4 rounded-md flex gap-4 w-full md:w-[48%] xl:w-[45%] 2xl:w-[48%]">
-                <Image
-                  src="/singleLesson.png"
-                  alt=""
-                  width={24}
-                  height={24}
-                  className="w-6 h-6"
-                />
-                <div className="">
-                  <h1 className="text-xl font-semibold">6</h1>
-                  <span className="text-sm text-gray-400">Lessons</span>
-                </div>
-              </div>
-              {/* CARD */}
-              <div className="bg-white p-4 rounded-md flex gap-4 w-full md:w-[48%] xl:w-[45%] 2xl:w-[48%]">
-                <Image
-                  src="/singleClass.png"
-                  alt=""
-                  width={24}
-                  height={24}
-                  className="w-6 h-6"
-                />
-                <div className="">
-                  <h1 className="text-xl font-semibold">6</h1>
-                  <span className="text-sm text-gray-400">Classes</span>
-                </div>
-              </div>
-            </div>
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(`${API_URL}professor/get/${idProfessor}`, { cache: "no-store" });
+        if (!response.ok) throw new Error('Error en la solicitud');
+        const result = await response.json();
+        setData(result);
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+    fetchData();
+  }, [id]);
+
+  if (error) return <p>Error: {error}</p>;
+  if (!data) return <p>Cargando...</p>;
+
+  const { name, lastName, cedula, fecha_nacimiento, address, phone, email, cursos, edad } = data;
+
+  return (
+    <div className="min-h-screen bg-gray-100 py-10 px-6 md:px-16 lg:px-32">
+      <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
+        <div className="flex items-center bg-blue-500 p-6 md:p-8 text-white">
+          <div className="rounded-full bg-blue-400 w-24 h-24 flex items-center justify-center text-3xl font-bold">
+            {name.charAt(0)}{lastName.charAt(0)}
           </div>
-          {/* BOTTOM */}
-          <div className="mt-4 bg-white rounded-md p-4 h-[800px]">
-            <h1>Teacher&apos;s Schedule</h1>
-            <BigCalendar />
+          <div className="ml-6">
+            <h1 className="text-3xl font-semibold">{name} {lastName}</h1>
+            <p className="text-sm">Edad: {edad} años</p>
           </div>
         </div>
-        {/* RIGHT */}
-        <div className="w-full xl:w-1/3 flex flex-col gap-4">
-          <div className="bg-white p-4 rounded-md">
-            <h1 className="text-xl font-semibold">Shortcuts</h1>
-            <div className="mt-4 flex gap-4 flex-wrap text-xs text-gray-500">
-              <Link className="p-3 rounded-md bg-lamaSkyLight" href="/">
-                Teacher&apos;s Classes
-              </Link>
-              <Link className="p-3 rounded-md bg-lamaPurpleLight" href="/">
-                Teacher&apos;s Students
-              </Link>
-              <Link className="p-3 rounded-md bg-lamaYellowLight" href="/">
-                Teacher&apos;s Lessons
-              </Link>
-              <Link className="p-3 rounded-md bg-pink-50" href="/">
-                Teacher&apos;s Exams
-              </Link>
-              <Link className="p-3 rounded-md bg-lamaSkyLight" href="/">
-                Teacher&apos;s Assignments
-              </Link>
-            </div>
-          </div>
-          <Performance/>
-          <Announcements />
+        <div className="p-6 md:p-8">
+          <h2 className="text-2xl font-semibold mb-4 text-blue-700">Información Personal</h2>
+          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <li className="bg-blue-50 p-4 rounded-md shadow-md"><strong>Cédula:</strong> {cedula}</li>
+            <li className="bg-blue-50 p-4 rounded-md shadow-md"><strong>Fecha de Nacimiento:</strong> {fecha_nacimiento}</li>
+            <li className="bg-blue-50 p-4 rounded-md shadow-md"><strong>Dirección:</strong> {address}</li>
+            <li className="bg-blue-50 p-4 rounded-md shadow-md"><strong>Teléfono:</strong> {phone}</li>
+            <li className="bg-blue-50 p-4 rounded-md shadow-md"><strong>Email:</strong> {email || "No disponible"}</li>
+          </ul>
+        </div>
+        <div className="p-6 md:p-8 border-t border-gray-200">
+          <h2 className="text-2xl font-semibold mb-4 text-blue-700">Cursos Asignados</h2>
+          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {cursos && cursos.length > 0 ? (
+              cursos.map((curso, index) => (
+                <li key={index} className="bg-blue-50 p-4 rounded-md shadow-md">
+                  <span className="text-lg font-medium text-blue-900">{curso}</span>
+                </li>
+              ))
+            ) : (
+              <p>No hay cursos asignados</p>
+            )}
+          </ul>
         </div>
       </div>
-    
-    )
+    </div>
+  );
 }
-
-export default SingleTeacherPage
