@@ -3,11 +3,10 @@
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useState } from "react";
+import { API_URL } from "../lib/config";
 
-// USE LAZY LOADING
 
-// import TeacherForm from "./forms/TeacherForm";
-// import StudentForm from "./forms/StudentForm";
+
 
 const TeacherForm = dynamic(() => import("./forms/TeacherForm"), {
   loading: () => <h1>Loading...</h1>,
@@ -30,6 +29,8 @@ const FormModal = ({
   id,
 }: {
   table:
+   | "miembro"
+    | "profe"
     | "teacher"
     | "student"
     | "parent"
@@ -56,13 +57,33 @@ const FormModal = ({
 
   const [open, setOpen] = useState(false);
 
+
+  const handleDelete = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault(); // Prevenir comportamiento predeterminado
+    try {
+      const response = await fetch(`${API_URL}${table}/delete/${id}`, {
+        method: "DELETE",
+      });
+  
+      if (!response.ok) {
+        throw new Error("Error al eliminar el profesor.");
+      }
+  
+      console.log("Eliminación exitosa");
+      // Refrescar estado o lista tras eliminar
+      window.location.reload();
+    } catch (err: any) {
+      console.error("Error:", err.message || err);
+    }
+  };
+
   const Form = () => {
     return type === "delete" && id ? (
       <form action="" className="p-4 flex flex-col gap-4">
         <span className="text-center font-medium">
           All data will be lost. Are you sure you want to delete this {table}?
         </span>
-        <button className="bg-red-700 text-white py-2 px-4 rounded-md border-none w-max self-center">
+        <button className="bg-red-700 text-white py-2 px-4 rounded-md border-none w-max self-center" onClick={handleDelete}>
           Delete
         </button>
       </form>

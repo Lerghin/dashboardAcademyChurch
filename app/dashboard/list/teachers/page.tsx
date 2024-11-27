@@ -57,7 +57,7 @@ const TeacherListPage = async () => {
                   </button>
                  </Link>
                     {role === "admin" && (
-                        <FormModal table="teacher" type="delete" id={item.idProfessor} />
+                        <FormModal table="profe" type="delete" id={item.idProfessor} />
                     )}
                 </div>
             </td>
@@ -71,12 +71,8 @@ const TeacherListPage = async () => {
                 <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
                     <TableSearch />
                     <div className="flex items-center gap-4">
-                        <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
-                            <Image src="/filter.png" alt="filter" width={14} height={14} />
-                        </button>
-                        <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
-                            <Image src="/sort.png" alt="sort" width={14} height={14} />
-                        </button>
+                   
+                        
                         {role === "admin" && (
                             <FormModal table="teacher" type="create" />
                         )}
