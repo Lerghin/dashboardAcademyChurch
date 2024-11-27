@@ -1,165 +1,271 @@
-"use client";
+'use client'
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import InputField from "../InputField";
-import Image from "next/image";
+import { API_URL } from '@/app/lib/config';
+import { useState } from 'react';
 
-const schema = z.object({
-  username: z
-    .string()
-    .min(3, { message: "Username must be at least 3 characters long!" })
-    .max(20, { message: "Username must be at most 20 characters long!" }),
-  email: z.string().email({ message: "Invalid email address!" }),
-  password: z
-    .string()
-    .min(8, { message: "Password must be at least 8 characters long!" }),
-  firstName: z.string().min(1, { message: "First name is required!" }),
-  lastName: z.string().min(1, { message: "Last name is required!" }),
-  phone: z.string().min(1, { message: "Phone is required!" }),
-  address: z.string().min(1, { message: "Address is required!" }),
-  bloodType: z.string().min(1, { message: "Blood Type is required!" }),
-  birthday: z.date({ message: "Birthday is required!" }),
-  sex: z.enum(["male", "female"], { message: "Sex is required!" }),
-  img: z.instanceof(File, { message: "Image is required" }),
-});
-
-type Inputs = z.infer<typeof schema>;
-
-const StudentForm = ({
-  type,
-  data,
-}: {
-  type: "create" | "update";
-  data?: any;
-}) => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<Inputs>({
-    resolver: zodResolver(schema),
+export default function CreateStudentPage() {
+  const [formData, setFormData] = useState({
+    cedula: '',
+    nombre: '',
+    apellido: '',
+    fecha_nacimiento: '',
+    direccion: '',
+    ocupacion: '',
+    telefono: '',
+    sexo: '',
+    status: '',
+    fecha_ingreso: '',
+    cursosRealizados: {},
+    nuevoCurso: '',
+    nuevoNivel: ''
   });
 
-  const onSubmit = handleSubmit((data) => {
-    console.log(data);
-  });
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prevState) => ({
+      ...prevState,
+      [name]: value
+    }));
+  };
+
+  const handleAddCourse = () => {
+    if (formData.nuevoCurso && formData.nuevoNivel) {
+      const newCourse = {
+        ...formData.cursosRealizados,
+        [formData.nuevoCurso]: formData.nuevoNivel,
+      };
+      setFormData((prevState) => ({
+        ...prevState,
+        cursosRealizados: newCourse,
+        nuevoCurso: '',
+        nuevoNivel: '',
+      }));
+    }
+  };
+
+  const handleRemoveCourse = (curso: string) => {
+    const newCourses = { ...formData.cursosRealizados };
+    delete newCourses[curso];
+    setFormData((prevState) => ({
+      ...prevState,
+      cursosRealizados: newCourses,
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await fetch(`${API_URL}miembro/create`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      if (!response.ok) throw new Error('Error al crear el miembro');
+      const responseText = await response.text();
+      setSuccess('Miembro creado con éxito');
+      setError(null); // Limpiar errores
+      setFormData({ // Limpiar el formulario
+        cedula: '',
+        nombre: '',
+        apellido: '',
+        fecha_nacimiento: '',
+        direccion: '',
+        ocupacion: '',
+        telefono: '',
+        sexo: '',
+        status: '',
+        fecha_ingreso: '',
+        cursosRealizados: {},
+        nuevoCurso: '',
+        nuevoNivel: ''
+      });
+    }  catch (err) {
+      console.error(err); // Esto te permitirá ver el error exacto en la consola
+      setError('Hubo un problema al crear el miembro');
+      setSuccess(null); // Limpiar éxito si hay un error
+    }
+  };
 
   return (
-    <form className="flex flex-col gap-8" onSubmit={onSubmit}>
-      <h1 className="text-xl font-semibold">Create a new student</h1>
-      <span className="text-xs text-gray-400 font-medium">
-        Authentication Information
-      </span>
-      <div className="flex justify-between flex-wrap gap-4">
-        <InputField
-          label="Username"
-          name="username"
-          defaultValue={data?.username}
-          register={register}
-          error={errors?.username}
-        />
-        <InputField
-          label="Email"
-          name="email"
-          defaultValue={data?.email}
-          register={register}
-          error={errors?.email}
-        />
-        <InputField
-          label="Password"
-          name="password"
-          type="password"
-          defaultValue={data?.password}
-          register={register}
-          error={errors?.password}
-        />
-      </div>
-      <span className="text-xs text-gray-400 font-medium">
-        Personal Information
-      </span>
-      <div className="flex justify-between flex-wrap gap-4">
-        <InputField
-          label="First Name"
-          name="firstName"
-          defaultValue={data?.firstName}
-          register={register}
-          error={errors.firstName}
-        />
-        <InputField
-          label="Last Name"
-          name="lastName"
-          defaultValue={data?.lastName}
-          register={register}
-          error={errors.lastName}
-        />
-        <InputField
-          label="Phone"
-          name="phone"
-          defaultValue={data?.phone}
-          register={register}
-          error={errors.phone}
-        />
-        <InputField
-          label="Address"
-          name="address"
-          defaultValue={data?.address}
-          register={register}
-          error={errors.address}
-        />
-        <InputField
-          label="Blood Type"
-          name="bloodType"
-          defaultValue={data?.bloodType}
-          register={register}
-          error={errors.bloodType}
-        />
-        <InputField
-          label="Birthday"
-          name="birthday"
-          defaultValue={data?.birthday}
-          register={register}
-          error={errors.birthday}
-          type="date"
-        />
-        <div className="flex flex-col gap-2 w-full md:w-1/4">
-          <label className="text-xs text-gray-500">Sex</label>
-          <select
-            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
-            {...register("sex")}
-            defaultValue={data?.sex}
-          >
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-          </select>
-          {errors.sex?.message && (
-            <p className="text-xs text-red-400">
-              {errors.sex.message.toString()}
-            </p>
-          )}
-        </div>
-        <div className="flex flex-col gap-2 w-full md:w-1/4 justify-center">
-          <label
-            className="text-xs text-gray-500 flex items-center gap-2 cursor-pointer"
-            htmlFor="img"
-          >
-            <Image src="/upload.png" alt="" width={28} height={28} />
-            <span>Upload a photo</span>
-          </label>
-          <input type="file" id="img" {...register("img")} className="hidden" />
-          {errors.img?.message && (
-            <p className="text-xs text-red-400">
-              {errors.img.message.toString()}
-            </p>
-          )}
-        </div>
-      </div>
-      <button className="bg-blue-400 text-white p-2 rounded-md">
-        {type === "create" ? "Create" : "Update"}
-      </button>
-    </form>
-  );
-};
+    <div className="w-full">
+      <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden w-full">
+        <div className="p-6 md:p-8">
+          <h2 className="text-2xl font-semibold mb-4 text-blue-700">Crear Nuevo Miembro</h2>
 
-export default StudentForm;
+          {/* Mensajes de éxito o error */}
+          {success && <div className="bg-green-200 p-4 mb-4 text-green-800 rounded-md">{success}</div>}
+          {error && <div className="bg-red-200 p-4 mb-4 text-red-800 rounded-md">{error}</div>}
+
+          <form onSubmit={handleSubmit}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Campos del formulario */}
+              <input
+                type="text"
+                name="nombre"
+                value={formData.nombre}
+                onChange={handleInputChange}
+                className="p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Nombre"
+              />
+              <input
+                type="text"
+                name="apellido"
+                value={formData.apellido}
+                onChange={handleInputChange}
+                className="p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Apellido"
+              />
+               <input
+                type="text"
+                name="cedula"
+                value={formData.cedula}
+                onChange={handleInputChange}
+                className="p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Cedula"
+              />
+              <input
+                type="date"
+                name="fecha_nacimiento"
+                value={formData.fecha_nacimiento}
+                onChange={handleInputChange}
+                className="p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <input
+                type="text"
+                name="direccion"
+                value={formData.direccion}
+                onChange={handleInputChange}
+                className="p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Dirección"
+              />
+              <input
+                type="text"
+                name="ocupacion"
+                value={formData.ocupacion}
+                onChange={handleInputChange}
+                className="p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Ocupación"
+              />
+              <input
+                type="text"
+                name="telefono"
+                value={formData.telefono}
+                onChange={handleInputChange}
+                className="p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Teléfono"
+              />
+            
+              <input
+                type="date"
+                name="fecha_ingreso"
+                value={formData.fecha_ingreso}
+                onChange={handleInputChange}
+                className="p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            <select
+            name="sexo"
+              value={formData.sexo}
+             onChange={handleInputChange}
+                  className="p-2 border rounded-md"
+                >
+             <option value="" disabled>Selecciona el sexo</option>
+            <option value="MASCULINO">Masculino</option>
+           <option value="FEMENINO">Femenino</option>
+          </select>
+
+       
+          <select
+           name="status"
+            value={formData.status}
+            onChange={handleInputChange}
+            className="p-2 border rounded-md"
+            >
+           <option value="" disabled>Selecciona el status</option>
+           <option value="REGULAR">REGULAR</option>
+            <option value="MIEMBRONUEVO">MIEMBRONUEVO</option>
+            <option value="RETIRADO">RETIRADO</option>
+        </select>
+
+          <input
+            type="date"
+            name="fecha_ingreso"
+            value={formData.fecha_ingreso}
+            onChange={handleInputChange}
+            className="p-2 border rounded-md"
+          />
+
+
+              {/* Sección de cursos realizados */}
+              <div className="col-span-2">
+                <h3 className="text-lg font-semibold text-blue-700 mb-2">Cursos Realizados</h3>
+                <div className="flex gap-4">
+                  <input
+                    type="text"
+                    name="nuevoCurso"
+                    value={formData.nuevoCurso}
+                    onChange={handleInputChange}
+                    className="p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Nuevo Curso"
+                  />
+                  <input
+                    type="text"
+                    name="nuevoNivel"
+                    value={formData.nuevoNivel}
+                    onChange={handleInputChange}
+                    className="p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Nivel"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddCourse}
+                    className="p-3 bg-blue-500 text-white rounded-md"
+                  >
+                    Añadir Curso
+                  </button>
+                </div>
+                <ul className="mt-2">
+                  {Object.keys(formData.cursosRealizados).map((curso) => (
+                    <li key={curso} className="bg-blue-50 p-4 rounded-md shadow-md flex justify-between items-center">
+                      <span className="text-lg font-medium text-blue-900">{curso}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveCourse(curso)}
+                        className="text-red-500"
+                      >
+                        Eliminar
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Botones de guardar */}
+              <div className="col-span-2 flex justify-between mt-6">
+                <button
+                  type="button"
+                  onClick={() => setFormData({ 
+                    cedula: '', nombre: '', apellido: '', fecha_nacimiento: '', direccion: '', 
+                    ocupacion: '', telefono: '', sexo: '', status: '', fecha_ingreso: '', cursosRealizados: {},
+                    nuevoCurso: '', nuevoNivel: '' 
+                  })}
+                  className="px-6 py-2 bg-gray-400 text-white rounded-md"
+                >
+                  Limpiar
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2 bg-blue-500 text-white rounded-md"
+                >
+                  Crear Miembro
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
