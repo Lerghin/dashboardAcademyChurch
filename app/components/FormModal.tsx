@@ -14,12 +14,16 @@ const TeacherForm = dynamic(() => import("./forms/TeacherForm"), {
 const StudentForm = dynamic(() => import("./forms/StudentForm"), {
   loading: () => <h1>Loading...</h1>,
 });
+const GroupsForm = dynamic(() => import("./forms/GroupsForm"), {
+  loading: () => <h1>Loading...</h1>,
+});
 
 const forms: {
   [key: string]: (type: "create" | "update", data?: any) => JSX.Element;
 } = {
   teacher: (type, data) => <TeacherForm type={type} data={data} />,
-  student: (type, data) => <StudentForm type={type} data={data} />
+  student: (type, data) => <StudentForm type={type} data={data} />,
+  group: (type, data) => <GroupsForm type={type} data={data}/>
 };
 
 const FormModal = ({
@@ -33,7 +37,8 @@ const FormModal = ({
     | "profe"
     | "teacher"
     | "student"
-    | "parent"
+    | "group"
+    | "grupo"
     | "subject"
     | "class"
     | "lesson"
@@ -81,7 +86,7 @@ const FormModal = ({
     return type === "delete" && id ? (
       <form action="" className="p-4 flex flex-col gap-4">
         <span className="text-center font-medium">
-          All data will be lost. Are you sure you want to delete this {table}?
+          Esta seguro de borrar  {table}?
         </span>
         <button className="bg-red-700 text-white py-2 px-4 rounded-md border-none w-max self-center" onClick={handleDelete}>
           Delete
