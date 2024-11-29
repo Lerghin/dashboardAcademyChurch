@@ -68,9 +68,14 @@ type Subject = {
         <td className="hidden md:table-cell px-8">{item.fecha_inicio}</td>
         <td>
           <div className="flex items-center gap-2">
+          <Link href={`/dashboard/list/subjects/${item.idCurso}`}>
+               <button className="w-7 h-7 flex items-center justify-center rounded-full bg-lamaSky">
+                 <Image src="/view.png" alt="" width={16} height={16} />
+          </button>
+                 </Link>
             {role === "admin" && (
               <>
-                <FormModal table="subject" type="update" data={item} />
+              
                 <FormModal table="subject" type="delete" id={item.idCurso} />
               </>
             )}

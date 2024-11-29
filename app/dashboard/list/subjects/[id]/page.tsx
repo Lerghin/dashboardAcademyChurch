@@ -1,169 +1,209 @@
+'use client';
 
-import BigCalendar from "@/app/components/BigCalender"
-import FormModal from "@/app/components/FormModal"
-import Performance from "@/app/components/Performance"
-import Image from "next/image"
-import Link from "next/link"
-import { role } from "@/app/lib/data"
+import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
+import { API_URL } from '@/app/lib/config';
+import EditCursoModal from '@/app/components/forms/EditCursoModal';
+import EditMiembroModal from '@/app/components/forms/EditMiembroModal';
+import EditModuloModal from '@/app/components/forms/EditModuloModal';
+import EditProfesorModal from '@/app/components/forms/EditProfesorModal';
 
+export default function CursoPage() {
+  const { id } = useParams<string>();
+  const [curso, setCurso] = useState(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isEditModalOpen, setEditModalOpen] = useState(false);
+  const [isEditProfesorModalOpen, setEditProfesorModalOpen] = useState(false);
+  const [isEditMiembroModalOpen, setEditMiembroModalOpen] = useState(false);
+  const [isEditModuloModalOpen, setEditModuloModalOpen] = useState(false);
 
-const  SingleSubjectPage = () => {
+  // Obtener datos del curso
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(`${API_URL}curso/get/${id}`, { cache: 'no-store' });
+        if (!response.ok) throw new Error('Error al cargar datos del curso');
+        const result = await response.json();
 
-    return (
-        <div className="flex-1 p-4 flex flex-col gap-4 xl:flex-row">
-        {/* LEFT */}
-        <div className="w-full xl:w-2/3">
-          {/* TOP */}
-          <div className="flex flex-col lg:flex-row gap-4">
-            {/* USER INFO CARD */}
-            <div className="bg-lamaSky py-6 px-4 rounded-md flex-1 flex gap-4">
-              <div className="w-1/3">
-                <Image
-                  src="https://images.pexels.com/photos/5414817/pexels-photo-5414817.jpeg?auto=compress&cs=tinysrgb&w=1200"
-                  alt=""
-                  width={144}
-                  height={144}
-                  className="w-36 h-36 rounded-full object-cover"
-                />
-              </div>
-              <div className="w-2/3 flex flex-col justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <h1 className="text-xl font-semibold">Cameron Moran</h1>
-                  {role === "admin" && <FormModal
-                    table="teacher"
-                    type="update"
-                    data={{
-                      id: 1,
-                      username: "deanguerrero",
-                      email: "deanguerrero@gmail.com",
-                      password: "password",
-                      firstName: "Dean",
-                      lastName: "Guerrero",
-                      phone: "+1 234 567 89",
-                      address: "1234 Main St, Anytown, USA",
-                      bloodType: "A+",
-                      dateOfBirth: "2000-01-01",
-                      sex: "male",
-                      img: "https://images.pexels.com/photos/2182970/pexels-photo-2182970.jpeg?auto=compress&cs=tinysrgb&w=1200",
-                    }}
-                  />}
-                </div>
-                <p className="text-sm text-gray-500">
-                  Lorem ipsum, dolor sit amet consectetur adipisicing elit.
-                </p>
-                <div className="flex items-center justify-between gap-2 flex-wrap text-xs font-medium">
-                  <div className="w-full md:w-1/3 lg:w-full 2xl:w-1/3 flex items-center gap-2">
-                    <Image src="/blood.png" alt="" width={14} height={14} />
-                    <span>A+</span>
-                  </div>
-                  <div className="w-full md:w-1/3 lg:w-full 2xl:w-1/3 flex items-center gap-2">
-                    <Image src="/date.png" alt="" width={14} height={14} />
-                    <span>January 2025</span>
-                  </div>
-                  <div className="w-full md:w-1/3 lg:w-full 2xl:w-1/3 flex items-center gap-2">
-                    <Image src="/mail.png" alt="" width={14} height={14} />
-                    <span>user@gmail.com</span>
-                  </div>
-                  <div className="w-full md:w-1/3 lg:w-full 2xl:w-1/3 flex items-center gap-2">
-                    <Image src="/phone.png" alt="" width={14} height={14} />
-                    <span>+1 234 567</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            {/* SMALL CARDS */}
-            <div className="flex-1 flex gap-4 justify-between flex-wrap">
-              {/* CARD */}
-              <div className="bg-white p-4 rounded-md flex gap-4 w-full md:w-[48%] xl:w-[45%] 2xl:w-[48%]">
-                <Image
-                  src="/singleAttendance.png"
-                  alt=""
-                  width={24}
-                  height={24}
-                  className="w-6 h-6"
-                />
-                <div className="">
-                  <h1 className="text-xl font-semibold">90%</h1>
-                  <span className="text-sm text-gray-400">Attendance</span>
-                </div>
-              </div>
-              {/* CARD */}
-              <div className="bg-white p-4 rounded-md flex gap-4 w-full md:w-[48%] xl:w-[45%] 2xl:w-[48%]">
-                <Image
-                  src="/singleBranch.png"
-                  alt=""
-                  width={24}
-                  height={24}
-                  className="w-6 h-6"
-                />
-                <div className="">
-                  <h1 className="text-xl font-semibold">6th</h1>
-                  <span className="text-sm text-gray-400">Grade</span>
-                </div>
-              </div>
-              {/* CARD */}
-              <div className="bg-white p-4 rounded-md flex gap-4 w-full md:w-[48%] xl:w-[45%] 2xl:w-[48%]">
-                <Image
-                  src="/singleLesson.png"
-                  alt=""
-                  width={24}
-                  height={24}
-                  className="w-6 h-6"
-                />
-                <div className="">
-                  <h1 className="text-xl font-semibold">18</h1>
-                  <span className="text-sm text-gray-400">Lessons</span>
-                </div>
-              </div>
-              {/* CARD */}
-              <div className="bg-white p-4 rounded-md flex gap-4 w-full md:w-[48%] xl:w-[45%] 2xl:w-[48%]">
-                <Image
-                  src="/singleClass.png"
-                  alt=""
-                  width={24}
-                  height={24}
-                  className="w-6 h-6"
-                />
-                <div className="">
-                  <h1 className="text-xl font-semibold">6A</h1>
-                  <span className="text-sm text-gray-400">Classes</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          {/* BOTTOM */}
-          <div className="mt-4 bg-white rounded-md p-4 h-[800px]">
-            <h1>Student&apos;s Schedule</h1>
-            <BigCalendar />
+        setCurso(result);
+      
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+    fetchData();
+  }, [id]);
+
+  if (error) {
+    return <p className="text-red-500 text-center mt-4">{error}</p>;
+  }
+
+  if (!curso) {
+    return <p className="text-center text-gray-500 mt-4 animate-pulse">Cargando datos del curso...</p>;
+  }
+
+  // Función de guardado
+  const handleSave = (updatedCurso) => {
+    setCurso(updatedCurso);
+  };
+
+  // Eliminar profesor
+  const handleDeleteProfesor = async (cedula) => {
+    try {
+      const response = await fetch(`${API_URL}profesor/delete/${cedula}`, { method: 'DELETE' });
+      if (!response.ok) throw new Error('Error al eliminar profesor');
+      const updatedCurso = await response.json();
+      setCurso(updatedCurso);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  // Eliminar miembro
+  const handleDeleteMiembro = async (cedula) => {
+    try {
+      const response = await fetch(`${API_URL}miembro/delete/${cedula}`, { method: 'DELETE' });
+      if (!response.ok) throw new Error('Error al eliminar miembro');
+      const updatedCurso = await response.json();
+      setCurso(updatedCurso);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  // Eliminar módulo
+  const handleDeleteModulo = async (idModulo) => {
+    try {
+      const response = await fetch(`${API_URL}modulo/delete/${idModulo}`, { method: 'DELETE' });
+      if (!response.ok) throw new Error('Error al eliminar módulo');
+      alert("Cambio Realizado con exito")
+      window.location.reload();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  return (
+    <div className="container mx-auto p-6">
+      <div className="bg-white shadow-md rounded-lg overflow-hidden">
+        {/* Cabecera */}
+        <div className="bg-blue-500 text-white p-6 flex justify-between items-center">
+          <h2 className="text-3xl font-bold">Nombre del Curso: {curso.nombreCurso}</h2>
+          <button
+            onClick={() => setEditModalOpen(true)}
+            className="text-white bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded-md"
+          >
+            ✏️ Editar Curso
+          </button>
+        </div>
+
+        {/* Contenido del curso */}
+        <div className="p-6">
+          <p className="text-gray-600 mb-4">Descripcion: {curso.descripcion}</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700">
+            <p><strong>Inicio:</strong> {new Date(curso.fecha_inicio).toLocaleDateString()}</p>
+            <p><strong>Fin:</strong> {new Date(curso.fecha_fin).toLocaleDateString()}</p>
           </div>
         </div>
-        {/* RIGHT */}
-        <div className="w-full xl:w-1/3 flex flex-col gap-4">
-          <div className="bg-white p-4 rounded-md">
-            <h1 className="text-xl font-semibold">Shortcuts</h1>
-            <div className="mt-4 flex gap-4 flex-wrap text-xs text-gray-500">
-              <Link className="p-3 rounded-md bg-lamaSkyLight" href="/">
-              Student&apos;s Lessons
-              </Link>
-              <Link className="p-3 rounded-md bg-lamaPurpleLight" href="/">
-              Student&apos;s Teachers
-              </Link>
-              <Link className="p-3 rounded-md bg-lamaSkyLight" href="/">
-              Student&apos;s Assignments
-              </Link>
-              <Link className="p-3 rounded-md bg-lamaYellowLight" href="/">
-              Student&apos;s Results
-              </Link>
-            
-            
-            </div>
-          </div>
-          <Performance/>
-          <Announcements />
+
+        {/* Lista de módulos */}
+        <div className="p-6 border-t border-gray-200">
+          <h3 className="text-xl font-semibold mb-4">Módulos</h3>
+          {curso.moduloList.length > 0 ? (
+            <ul className="list-disc pl-5 space-y-2 text-gray-700">
+              {curso.moduloList.map((modulo, index) => (
+                <li key={index}>
+                  <strong>{modulo.numModulo}:</strong> {modulo.descripcion}
+                  <button
+                    onClick={() => handleDeleteModulo(modulo.idModulo)}
+                    className="text-red-500 ml-4"
+                  >
+                    Eliminar
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No hay módulos asignados.</p>
+          )}
+          <button
+            onClick={() => setEditModuloModalOpen(true)}
+            className="text-white bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded-md mt-4"
+          >
+            Agregar Módulo
+          </button>
+        </div>
+
+        {/* Lista de profesores */}
+        <div className="p-6 border-t border-gray-200">
+          <h3 className="text-xl font-semibold mb-4">Profesores</h3>
+          {curso.professorDTOS.length > 0 ? (
+            <ul className="list-disc pl-5 space-y-2 text-gray-700">
+              {curso.professorDTOS.map((profesor, index) => (
+                <li key={index}>
+                  <strong>{profesor.name} {profesor.lastName} ({profesor.cedula})</strong>
+                  <button
+                    onClick={() => handleDeleteProfesor(profesor.cedula)}
+                    className="text-red-500 ml-4"
+                  >
+                    Eliminar
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No hay profesores asignados.</p>
+          )}
+          <button
+            onClick={() => setEditProfesorModalOpen(true)}
+            className="text-white bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded-md mt-4"
+          >
+            Agregar Profesor
+          </button>
+        </div>
+
+        {/* Lista de miembros */}
+        <div className="p-6 border-t border-gray-200">
+          <h3 className="text-xl font-semibold mb-4">Miembros/Participantes</h3>
+          {curso.miembroDTOList.length > 0 ? (
+            <ul className="list-disc pl-5 space-y-2 text-gray-700">
+              {curso.miembroDTOList.map((miembro, index) => (
+                <li key={index}>
+                  <strong>{miembro.nombre} {miembro.apellido} ({miembro.cedula})</strong>
+                  <button
+                    onClick={() => handleDeleteMiembro(miembro.cedula)}
+                    className="text-red-500 ml-4"
+                  >
+                    Eliminar
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No hay miembros asignados.</p>
+          )}
+          <button
+            onClick={() => setEditMiembroModalOpen(true)}
+            className="text-white bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded-md mt-4"
+          >
+            Agregar Miembro
+          </button>
         </div>
       </div>
-    
-    )
-}
 
-export default SingleSubjectPage
+      {/* Modales */}
+      {isEditModalOpen && (
+        <EditCursoModal curso={curso} onClose={() => setEditModalOpen(false)} onSave={handleSave} />
+      )}
+      {isEditProfesorModalOpen && (
+        <EditProfesorModal curso={curso} onClose={() => setEditProfesorModalOpen(false)} onSave={handleSave} />
+      )}
+      {isEditMiembroModalOpen && (
+        <EditMiembroModal curso={curso} onClose={() => setEditMiembroModalOpen(false)} onSave={handleSave} />
+      )}
+      {isEditModuloModalOpen && (
+        <EditModuloModal curso={curso} onClose={() => setEditModuloModalOpen(false)} onSave={handleSave} />
+      )}
+    </div>
+  );
+}
