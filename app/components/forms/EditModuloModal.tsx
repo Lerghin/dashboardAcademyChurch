@@ -1,4 +1,4 @@
-// EditModuloModal.tsx
+import { API_URL } from '@/app/lib/config';
 import { useState } from 'react';
 
 interface Modulo {
@@ -7,22 +7,47 @@ interface Modulo {
 }
 
 interface EditModuloModalProps {
-  cursoId: string;
+  id: string;
   onClose: () => void;
   onSave: (modulo: Modulo) => void;
   modulo?: Modulo;
 }
 
-const EditModuloModal: React.FC<EditModuloModalProps> = ({ cursoId, onClose, onSave, modulo }) => {
+const EditModuloModal: React.FC<EditModuloModalProps> = ({ id, onClose, onSave, modulo }) => {
   const [numModulo, setNumModulo] = useState<string>(modulo?.numModulo || '');
   const [descripcion, setDescripcion] = useState<string>(modulo?.descripcion || '');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const handleSubmit = async () => {
+  const handleSaveModulo = async () => {
+    setIsLoading(true);
     const newModulo = { numModulo, descripcion };
-    // Aquí podrías hacer un fetch a tu API para guardar el nuevo módulo
-    // Por ejemplo: await fetch('tu-api/modulo', { method: 'POST', body: JSON.stringify(newModulo) });
-    onSave(newModulo);
-    onClose();
+
+    try {
+      const response = await fetch(`${API_URL}modulo/create/${id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newModulo),
+      });
+
+      const data = await response.text();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Error al guardar el módulo');
+      }
+
+      alert(data.message || 'Módulo guardado con éxito');
+
+      onClose(); // Cerrar el modal
+      window.location.reload();
+      
+    } catch (err) {
+      console.error('Error al guardar módulo:', err.message);
+      alert('Error al guardar módulo: ' + err.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -57,15 +82,15 @@ const EditModuloModal: React.FC<EditModuloModalProps> = ({ cursoId, onClose, onS
             Cancelar
           </button>
           <button
-            onClick={handleSubmit}
-            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+            onClick={handleSaveModulo}
+            disabled={isLoading} // Deshabilitar el botón mientras se realiza la petición
+            className={`px-4 py-2 rounded-md ${isLoading ? 'bg-gray-300' : 'bg-blue-500 text-white'} hover:bg-blue-600`}
           >
-            Guardar
+            {isLoading ? 'Guardando...' : 'Guardar'}
           </button>
         </div>
       </div>
     </div>
   );
 };
-
 export default EditModuloModal;
