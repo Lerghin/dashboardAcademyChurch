@@ -56,13 +56,14 @@ export default function CursoPage() {
 
   // Eliminar profesor
   const handleDeleteProfesor = async (cedula) => {
+    if (!confirm("¿Seguro que deseas eliminar este profesor?")) return;
     try {
       const response = await fetch(`${API_URL}curso/delete/${cedula}/${id}`, {
         method: "PUT",
       });
       if (!response.ok) throw new Error("Error al eliminar profesor");
       const updatedCurso = await response.text();
-      setCurso(updatedCurso);
+      window.location.reload();
     } catch (err) {
       setError(err.message);
     }
@@ -267,7 +268,7 @@ export default function CursoPage() {
       )}
       {isEditMiembroModalOpen && (
         <EditMiembroModal
-          curso={curso}
+          cursoId={curso.idCurso}
           onClose={() => setEditMiembroModalOpen(false)}
           onSave={handleSave}
         />

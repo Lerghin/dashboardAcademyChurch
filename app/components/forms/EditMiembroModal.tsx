@@ -20,12 +20,27 @@ const EditMiembroModal: React.FC<EditMiembroModalProps> = ({ cursoId, onClose, o
   const [cedula, setCedula] = useState<string>(miembro?.cedula || '');
 
   const handleSubmit = async () => {
-    const newMiembro = { nombre, apellido, cedula };
-    // Aquí podrías hacer un fetch a tu API para guardar el nuevo miembro
-    // Por ejemplo: await fetch('tu-api/miembro', { method: 'POST', body: JSON.stringify(newMiembro) });
-    onSave(newMiembro);
-    onClose();
+    const newProfesor = { name, lastName, cedula, cursoId }; // Incluye cursoId en el objeto
+    try {
+      const response = await fetch(`${API_URL}curso/addMiembro/${cedula}/${cursoId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newProfesor),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Error al guardar el profesor");
+      }
+  
+      const savedProfesor = await response.text();
+    
+      onClose();
+      window.location.reload();
+    } catch (err) {
+      alert(`Error: ${err.message}`);
+    }
   };
+  
 
   return (
     <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
