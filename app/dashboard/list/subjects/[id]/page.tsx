@@ -57,11 +57,11 @@ export default function CursoPage() {
   // Eliminar profesor
   const handleDeleteProfesor = async (cedula) => {
     try {
-      const response = await fetch(`${API_URL}profesor/delete/${cedula}`, {
-        method: "DELETE",
+      const response = await fetch(`${API_URL}curso/delete/${cedula}/${id}`, {
+        method: "PUT",
       });
       if (!response.ok) throw new Error("Error al eliminar profesor");
-      const updatedCurso = await response.json();
+      const updatedCurso = await response.text();
       setCurso(updatedCurso);
     } catch (err) {
       setError(err.message);
@@ -166,7 +166,7 @@ export default function CursoPage() {
           <button
             onClick={() => {
               setSelectedCursoId(id);
-              console.log(selectedCursoId) // Guardar el id del curso al hacer clic
+              console.log(selectedCursoId); // Guardar el id del curso al hacer clic
               setEditModuloModalOpen(true); // Abrir el modal de edición
             }}
             className="text-white bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded-md mt-4"
@@ -174,7 +174,7 @@ export default function CursoPage() {
             Agregar Módulo
           </button>
         </div>
-      
+
         {isEditModuloModalOpen && (
           <EditModuloModal
             cursoId={selectedCursoId} // Pasar el idCurso seleccionado al modal
@@ -254,9 +254,15 @@ export default function CursoPage() {
       )}
       {isEditProfesorModalOpen && (
         <EditProfesorModal
-          curso={curso}
+          cursoId={curso.idCurso} // Enviar el cursoId como prop
           onClose={() => setEditProfesorModalOpen(false)}
-          onSave={handleSave}
+          onSave={(profesor) => {
+            // Actualizar profesores en el estado del curso si es necesario
+            setCurso((prevCurso) => ({
+              ...prevCurso,
+              professorDTOS: [...prevCurso.professorDTOS, profesor],
+            }));
+          }}
         />
       )}
       {isEditMiembroModalOpen && (

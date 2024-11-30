@@ -1,4 +1,5 @@
 // EditProfesorModal.tsx
+import { API_URL } from '@/app/lib/config';
 import { useState } from 'react';
 
 interface Profesor {
@@ -20,12 +21,27 @@ const EditProfesorModal: React.FC<EditProfesorModalProps> = ({ cursoId, onClose,
   const [cedula, setCedula] = useState<string>(profesor?.cedula || '');
 
   const handleSubmit = async () => {
-    const newProfesor = { name, lastName, cedula };
-    // Aquí podrías hacer un fetch a tu API para guardar el nuevo profesor
-    // Por ejemplo: await fetch('tu-api/profesor', { method: 'POST', body: JSON.stringify(newProfesor) });
-    onSave(newProfesor);
-    onClose();
+    const newProfesor = { name, lastName, cedula, cursoId }; // Incluye cursoId en el objeto
+    try {
+      const response = await fetch(`${API_URL}curso/${cedula}/${cursoId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newProfesor),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Error al guardar el profesor");
+      }
+  
+      const savedProfesor = await response.text();
+    
+      onClose();
+      window.location.reload();
+    } catch (err) {
+      alert(`Error: ${err.message}`);
+    }
   };
+  
 
   return (
     <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
