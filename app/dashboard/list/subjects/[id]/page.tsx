@@ -62,8 +62,9 @@ export default function CursoPage() {
         method: "PUT",
       });
       if (!response.ok) throw new Error("Error al eliminar profesor");
-      const updatedCurso = await response.text();
       window.location.reload();
+      const updatedCurso = await response.text();
+      
     } catch (err) {
       setError(err.message);
     }
@@ -71,13 +72,16 @@ export default function CursoPage() {
 
   // Eliminar miembro
   const handleDeleteMiembro = async (cedula) => {
+    if (!confirm("¿Seguro que deseas eliminar este participante?")) return;
     try {
-      const response = await fetch(`${API_URL}miembro/delete/${cedula}`, {
-        method: "DELETE",
+      const response = await fetch(`${API_URL}curso/delete-member/${id}/${cedula}`, {
+        method: "PUT",
       });
       if (!response.ok) throw new Error("Error al eliminar miembro");
-      const updatedCurso = await response.json();
-      setCurso(updatedCurso);
+     
+      window.location.reload();
+      const updatedCurso = await response.text();
+     
     } catch (err) {
       setError(err.message);
     }

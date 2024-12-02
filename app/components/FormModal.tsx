@@ -6,7 +6,9 @@ import { useState } from "react";
 import { API_URL } from "../lib/config";
 
 
-
+const CursoForm = dynamic(() => import("./forms/FormCrearCurso"), {
+  loading: () => <h1>Loading...</h1>,
+});
 
 const TeacherForm = dynamic(() => import("./forms/TeacherForm"), {
   loading: () => <h1>Loading...</h1>,
@@ -23,7 +25,8 @@ const forms: {
 } = {
   teacher: (type, data) => <TeacherForm type={type} data={data} />,
   student: (type, data) => <StudentForm type={type} data={data} />,
-  group: (type, data) => <GroupsForm type={type} data={data}/>
+  group: (type, data) => <GroupsForm type={type} data={data}/>,
+  curso: (type, data) => <CursoForm type={type} data={data}/>
 };
 
 const FormModal = ({
@@ -34,6 +37,7 @@ const FormModal = ({
 }: {
   table:
    | "miembro"
+   | "curso"
     | "profe"
     | "teacher"
     | "student"

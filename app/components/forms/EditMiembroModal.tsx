@@ -1,4 +1,5 @@
 // EditMiembroModal.tsx
+import { API_URL } from '@/app/lib/config';
 import { useState } from 'react';
 
 interface Miembro {
@@ -18,29 +19,28 @@ const EditMiembroModal: React.FC<EditMiembroModalProps> = ({ cursoId, onClose, o
   const [nombre, setNombre] = useState<string>(miembro?.nombre || '');
   const [apellido, setApellido] = useState<string>(miembro?.apellido || '');
   const [cedula, setCedula] = useState<string>(miembro?.cedula || '');
-
   const handleSubmit = async () => {
-    const newProfesor = { name, lastName, cedula, cursoId }; // Incluye cursoId en el objeto
+    const newMember = { nombre, apellido, cedula, cursoId }; // Incluye cursoId en el objeto
     try {
-      const response = await fetch(`${API_URL}curso/addMiembro/${cedula}/${cursoId}`, {
+      const response = await fetch(`${API_URL}curso/add-member/${cursoId}/${cedula}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newProfesor),
+        body: JSON.stringify(newMember),
       });
   
       if (!response.ok) {
-        throw new Error("Error al guardar el profesor");
+        throw new Error("Error al guardar el Miembro");
       }
   
-      const savedProfesor = await response.text();
+      const savedMember = await response.text();
     
       onClose();
+      alert('Miembro agregado exitosamente')
       window.location.reload();
     } catch (err) {
       alert(`Error: ${err.message}`);
     }
   };
-  
 
   return (
     <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
