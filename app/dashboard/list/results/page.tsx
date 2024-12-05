@@ -7,118 +7,110 @@ import { role } from "@/app/lib/data";
 import Image from "next/image";
 import Link from "next/link";
 
-type NotaMiembro = {
-  idNota: string;
-  idModulo: string;
-  nota: number;
-  cedula: string;
-  statusAprobacion: string;
+type ProfessorDTO = {
+  id: string;
+  name: string;
+  lastName: string;
 };
-
-type ModuloNota = {
-  idModulo: string;
+type Subject = {
   idCurso: string;
   nombreCurso: string;
-  numModulo: number;
-  descripcion: string;
-  notaMiembroDTOList: NotaMiembro[];
+  professorDTOS: ProfessorDTO[];
+  fecha_inicio: string;
+  fecha_fin: string;
 };
 
 const columns = [
   {
-    header: "Curso",
+    header: "Nombre del Curso",
     accessor: "nombreCurso",
   },
   {
-    header: "Modulo",
-    accessor: "numModulo",
+    header: "Profesor",
+    accessor: "profesor",
+    className: "hidden md:table-cell",
   },
   {
-    header: "Descripción",
-    accessor: "descripcion",
+    header: "Fecha de Inicio",
+    accessor: "fecha_inicio",
+    className: "hidden md:table-cell",
+  },
+  {
+    header: "Fecha de Finalización",
+    accessor: "fecha_fin",
+    className: "hidden md:table-cell",
   },
   {
     header: "Acciones",
-    accessor: "actions",
+    accessor: "action",
   },
 ];
 
-const ModuloNotaListPage = async () => {
-  // Realizamos la llamada a la API
-  const response = await fetch(`${API_URL}modulo/getmodulos`, { cache: "no-store" });
-  
-  // Verificamos si la respuesta fue exitosa y si los datos son correctos
-  if (!response.ok) {
-    // Manejamos errores si es necesario
-    return <div>Error al cargar los módulos</div>;
-  }
+const ResultListPage = async () => {
+ 
+  // Realiza la solicitud de datos a la API
+  const response = await fetch(`${API_URL}curso/getcur`, { cache: "no-store" });
+  const subjectsData: Subject[] = await response.json();
 
-  const modulosData: ModuloNota[] = await response.json();
+  const renderRow = (item: Subject) => (
+    <tr
+      key={item.idCurso}
+      className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-lamaPurpleLight"
+    >
+      <td className="flex items-center gap-4 p-4">
+      <Link className="text-blue-600 hover:underline" href={`/dashboard/list/results/${item.idCurso}`}>
+         {item.nombreCurso}
+        </Link>
 
-  const renderRow = (item: ModuloNota) => (
-    <tr key={item.idModulo} className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-lamaPurpleLight">
-      <td className="p-4">{item.nombreCurso}</td>
-      <td className="text-center">{item.numModulo}</td>
-      <td>{item.descripcion}</td>
+
+      </td>
+      <td className="hidden md:table-cell">
+        {item.professorDTOS.map((professor, index) => (
+          <span key={index}>
+            {professor.name} {professor.lastName}
+            {index < item.professorDTOS.length - 1 && ", "}
+          </span>
+        ))}
+      </td>
+      <td className="hidden md:table-cell px-6">{item.fecha_inicio}</td>
+      <td className="hidden md:table-cell px-8">{item.fecha_fin}</td>
       <td>
         <div className="flex items-center gap-2">
-          <Link href={`/dashboard/list/modulos/${item.idModulo}`}>
+          <Link href={`/dashboard/list/subjects/${item.idCurso}`}>
             <button className="w-7 h-7 flex items-center justify-center rounded-full bg-lamaSky">
-              <Image src="/view.png" alt="Ver" width={16} height={16} />
+              <Image src="/view.png" alt="" width={16} height={16} />
             </button>
           </Link>
-          <FormModal
-            table="moduloNota"
-            type="view"
-            id={item.idModulo}
-            content={
-              <Table
-                columns={[
-                  { header: "Cedula", accessor: "cedula" },
-                  { header: "Nota", accessor: "nota" },
-                  { header: "Estado", accessor: "statusAprobacion" },
-                ]}
-                renderRow={(notaItem: NotaMiembro) => (
-                  <tr key={notaItem.idNota} className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-lamaPurpleLight">
-                    <td className="p-4">{notaItem.cedula}</td>
-                    <td className="text-center">{notaItem.nota}</td>
-                    <td>{notaItem.statusAprobacion}</td>
-                  </tr>
-                )}
-                data={item.notaMiembroDTOList}
-              />
-            }
-          />
+          {role === "admin" && <FormModal table="curso" type="delete" id={item.idCurso} />}
         </div>
       </td>
     </tr>
   );
 
-  // Verificación adicional para que no se intente renderizar la tabla hasta que los datos estén listos
-  if (!modulosData || modulosData.length === 0) {
-    return <div>No se encontraron módulos disponibles.</div>;
-  }
-
   return (
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
       {/* TOP */}
       <div className="flex items-center justify-between">
-        <h1 className="hidden md:block text-lg font-semibold">Todos los Modulos</h1>
+        <h1 className="hidden md:block text-lg font-semibold">Todos los Cursos</h1>
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <TableSearch />
           <div className="flex items-center gap-4 self-end">
-            {role === "admin" && (
-              <FormModal table="moduloNota" type="create" />
-            )}
+            {role === "admin" && <FormModal table="curso" type="create" />}
           </div>
         </div>
       </div>
       {/* LIST */}
-      <Table columns={columns} renderRow={renderRow} data={modulosData} />
+      {subjectsData.length > 0 ? (
+        <Table columns={columns} renderRow={renderRow} data={subjectsData} />
+      ) : (
+        <div className="text-center text-gray-500 py-10">
+          <p>No hay cursos todavía agregados.</p>
+        </div>
+      )}
       {/* PAGINATION */}
       <Pagination />
     </div>
   );
 };
 
-export default ModuloNotaListPage;
+export default ResultListPage;
