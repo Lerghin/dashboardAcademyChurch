@@ -58,7 +58,7 @@ const ModuleListPage = ({ params }: ModuleListPageProps) => {
       </td>
       <td>{item.descripcion}</td>
       <td>
-        <Link href={`/dashboard/list/modules/${item.idModulo}`}>
+        <Link href={`/dashboard/list/results/${id}/${item.idModulo}`}>
           <button className="bg-blue-500 text-white px-4 py-1 rounded">Ver Notas</button>
         </Link>
       </td>
