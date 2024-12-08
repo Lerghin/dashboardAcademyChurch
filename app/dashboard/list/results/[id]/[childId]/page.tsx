@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { API_URL } from "@/app/lib/config";
 import Table from "@/app/components/Table";
@@ -16,7 +16,8 @@ type NotaMiembroDTO = {
 const columns = [
   { header: "Cédula", accessor: "cedula" },
   { header: "Nota", accessor: "nota" },
-  { header: "Estado", accessor: "statusAprobacion" },
+  { header: "Estado", accessor: "aprobacionCurso" },
+  { header: "Acciones", accessor: "actions" },
 ];
 
 const NotesPage = () => {
@@ -25,10 +26,12 @@ const NotesPage = () => {
   const [notes, setNotes] = useState<NotaMiembroDTO[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
+    idNota: "",
     idModulo: childId,
     cedula: "",
     nota: "",
   });
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     const fetchNotes = async () => {
@@ -43,7 +46,6 @@ const NotesPage = () => {
           const data = await response.json();
           setNotes(data);
         } else {
-          
           console.error("Error al obtener las notas");
         }
       } catch (error) {
@@ -68,21 +70,41 @@ const NotesPage = () => {
       <td className="p-4">{item.cedula}</td>
       <td className="p-4">{item.nota}</td>
       <td className="p-4">{item.aprobacionCurso}</td>
+      <td className="p-4">
+        <button
+          onClick={() => handleEditClick(item)}
+          className="text-blue-500 hover:text-blue-700"
+        >
+          ✏️
+        </button>
+      </td>
     </tr>
   );
 
   const handleOpenModal = () => {
     setFormData({
+      idNota: "",
       idModulo: childId,
       cedula: "",
       nota: "",
-     
     });
+    setIsEditing(false);
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+  };
+
+  const handleEditClick = (note: NotaMiembroDTO) => {
+    setFormData({
+      idNota: note.idNota,
+      idModulo: note.idModulo,
+      cedula: note.cedula,
+      nota: note.nota.toString(),
+    });
+    setIsEditing(true);
+    setIsModalOpen(true);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -94,28 +116,54 @@ const NotesPage = () => {
 
   const handleSaveNote = async () => {
     const newNote = { ...formData };
-    console.log(newNote);
-  
-    const response = await fetch(`${API_URL}nota/createnot`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(newNote),
-    });
-  
-    if (response.ok) {
-      const createdNote = await response.json();
-      setNotes([...notes, createdNote]);
-      alert("Nota creada satisfactoriamente");
-      handleCloseModal();
+    if (isEditing) {
+      // Editar nota existente
+      const response = await fetch(`${API_URL}nota/${formData.idNota}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newNote),
+      });
+
+      if (response.ok) {
+        const updatedNote = await response.json();
+        setNotes(
+          notes.map((note) =>
+            note.idNota === formData.idNota ? updatedNote : note
+          )
+        );
+        alert("Nota actualizada satisfactoriamente");
+        handleCloseModal();
+        location.reload();
+      } else {
+        const errorData = await response.json();
+        const errorMessage = errorData.message || response.statusText;
+        alert(`Error: ${errorMessage}`);
+      }
     } else {
-      // Intentar obtener el mensaje de error desde el cuerpo de la respuesta
-      const errorData = await response.json();
-      const errorMessage = errorData.message || response.statusText; // Si no hay mensaje, usar statusText como fallback
-      alert(`Error: ${errorMessage}`);
+      // Crear nueva nota
+      const response = await fetch(`${API_URL}nota/createnot`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newNote),
+      });
+
+      if (response.ok) {
+        const createdNote = await response.json();
+        setNotes([...notes, createdNote]);
+        alert("Nota creada satisfactoriamente");
+        handleCloseModal();
+      } else {
+        const errorData = await response.json();
+        const errorMessage = errorData.message || response.statusText;
+        alert(`Error: ${errorMessage}`);
+      }
     }
   };
+
   return (
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
       <h1 className="text-lg font-semibold">Notas del Módulo</h1>
@@ -125,7 +173,7 @@ const NotesPage = () => {
       >
         Agregar Nota
       </button>
-      
+
       {notes.length > 0 ? (
         <Table columns={columns} renderRow={renderRow} data={notes} />
       ) : (
@@ -135,11 +183,13 @@ const NotesPage = () => {
       {isModalOpen && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
           <div className="bg-white p-6 rounded-md w-96">
-            <h2 className="text-lg font-semibold mb-4">Agregar Nota</h2>
+            <h2 className="text-lg font-semibold mb-4">
+              {isEditing ? "Editar Nota" : "Agregar Nota"}
+            </h2>
             <input
               type="hidden"
               name="idNota"
-              value={formData.idModulo}
+              value={formData.idNota}
               onChange={handleInputChange}
             />
             <div className="mb-4">

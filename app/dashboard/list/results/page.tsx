@@ -1,17 +1,19 @@
+'use client'
 import FormModal from "@/app/components/FormModal";
 import Pagination from "@/app/components/Pagination";
 import Table from "@/app/components/Table";
-import TableSearch from "@/app/components/TableSearch";
 import { API_URL } from "@/app/lib/config";
 import { role } from "@/app/lib/data";
 import Image from "next/image";
 import Link from "next/link";
+import { useState, useEffect } from "react";
 
 type ProfessorDTO = {
   id: string;
   name: string;
   lastName: string;
 };
+
 type Subject = {
   idCurso: string;
   nombreCurso: string;
@@ -47,10 +49,22 @@ const columns = [
 ];
 
 const ResultListPage = async () => {
- 
-  // Realiza la solicitud de datos a la API
-  const response = await fetch(`${API_URL}curso/getcur`, { cache: "no-store" });
-  const subjectsData: Subject[] = await response.json();
+  const [subjectsData, setSubjectsData] = useState<Subject[]>([]);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+
+  // Función para cargar los datos de los cursos y calcular las páginas
+  const loadSubjectsData = async (page: number) => {
+    const response = await fetch(`${API_URL}curso/getcur?page=${page}`, { cache: "no-store" });
+    const data = await response.json();
+    setSubjectsData(data.subjects);
+    setTotalPages(data.totalPages);
+  };
+
+  // Cargar los cursos al montar el componente y cuando cambia la página
+  useEffect(() => {
+    loadSubjectsData(currentPage);
+  }, [currentPage]);
 
   const renderRow = (item: Subject) => (
     <tr
@@ -58,11 +72,9 @@ const ResultListPage = async () => {
       className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-lamaPurpleLight"
     >
       <td className="flex items-center gap-4 p-4">
-      <Link className="text-blue-600 hover:underline" href={`/dashboard/list/results/${item.idCurso}`}>
-         {item.nombreCurso}
+        <Link className="text-blue-600 hover:underline" href={`/dashboard/list/results/${item.idCurso}`}>
+          {item.nombreCurso}
         </Link>
-
-
       </td>
       <td className="hidden md:table-cell">
         {item.professorDTOS.map((professor, index) => (
@@ -93,7 +105,6 @@ const ResultListPage = async () => {
       <div className="flex items-center justify-between">
         <h1 className="hidden md:block text-lg font-semibold">Todos los Cursos</h1>
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
-          <TableSearch />
           <div className="flex items-center gap-4 self-end">
             {role === "admin" && <FormModal table="curso" type="create" />}
           </div>
@@ -108,7 +119,11 @@ const ResultListPage = async () => {
         </div>
       )}
       {/* PAGINATION */}
-      <Pagination />
+      <Pagination 
+        totalPages={totalPages} 
+        currentPage={currentPage} 
+        setCurrentPage={setCurrentPage} 
+      />
     </div>
   );
 };

@@ -4,6 +4,9 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useState } from "react";
 import { API_URL } from "../lib/config";
+import EditEventModal from "./forms/EditEventModalProps";
+import CreateEventModal from "./forms/CreateEventModal";
+import CreatePagoModal from "./forms/CreatePago";
 
 
 const CursoForm = dynamic(() => import("./forms/FormCrearCurso"), {
@@ -26,7 +29,9 @@ const forms: {
   teacher: (type, data) => <TeacherForm type={type} data={data} />,
   student: (type, data) => <StudentForm type={type} data={data} />,
   group: (type, data) => <GroupsForm type={type} data={data}/>,
-  curso: (type, data) => <CursoForm type={type} data={data}/>
+  curso: (type, data) => <CursoForm type={type} data={data}/>,
+  events: (type, data) => <CreateEventModal type={type} data={data}/>,
+  pago: (type, data) => <CreatePagoModal type={type} data={data}/>
 };
 
 const FormModal = ({
@@ -36,6 +41,7 @@ const FormModal = ({
   id,
 }: {
   table:
+  "events"
    | "miembro"
    | "curso"
     | "profe"
@@ -51,7 +57,7 @@ const FormModal = ({
     | "result"
     | "attendance"
     | "event"
-    | "announcement";
+    |  "pago"
   type: "create" | "update" | "delete";
   data?: any;
   id?: string;

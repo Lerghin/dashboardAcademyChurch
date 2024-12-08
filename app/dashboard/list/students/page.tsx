@@ -116,7 +116,8 @@ const StudentListPage = async () => {
       {/* LIST */}
      <Table columns={columns} renderRow={renderRow} data={studentsData}/>
       {/* PAGINATION */}
-      <Pagination />
+      <Pagination totalPages={10} />
+
     </div>
   );
 };
