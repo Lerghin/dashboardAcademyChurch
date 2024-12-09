@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { useState, useEffect } from "react";
 import FormModal from "@/app/components/FormModal";
@@ -40,8 +40,9 @@ const columns = [
 const EventListPage = () => {
   const [eventsData, setEventsData] = useState<Event[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchName, setSearchName] = useState(""); // Captura la búsqueda por nombre
+  const [searchDate, setSearchDate] = useState(""); // Captura la búsqueda por fecha
 
-  // Número de eventos por página
   const eventsPerPage = 10;
 
   // Obtener los eventos cuando el componente se monta
@@ -58,10 +59,19 @@ const EventListPage = () => {
   // Calcular el rango de eventos a mostrar en base a la página actual
   const indexOfLastEvent = currentPage * eventsPerPage;
   const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
-  const currentEvents = eventsData.slice(indexOfFirstEvent, indexOfLastEvent);
 
-  // Calcular el número total de páginas
-  const totalPages = Math.ceil(eventsData.length / eventsPerPage);
+  // Función para filtrar los datos
+  const filteredEvents = eventsData.filter((event) => {
+    const matchesName = event.nameEvents.toLowerCase().includes(searchName.toLowerCase());
+    const matchesDate = searchDate
+      ? event.fecha_inicio.startsWith(searchDate) // Filtrar por fecha de inicio
+      : true;
+    return matchesName && matchesDate;
+  });
+
+  const currentEvents = filteredEvents.slice(indexOfFirstEvent, indexOfLastEvent);
+
+  const totalPages = Math.ceil(filteredEvents.length / eventsPerPage);
 
   const renderRow = (item: Event) => (
     <tr
@@ -75,7 +85,6 @@ const EventListPage = () => {
       </td>
       <td className="hidden md:table-cell">{item.description}</td>
       <td className="hidden md:table-cell text-left">{item.fecha_inicio}</td>
-
       <td>
         <div className="flex items-center gap-2">
           <Link href={`/dashboard/list/events/${item.idEvents}`}>
@@ -98,19 +107,42 @@ const EventListPage = () => {
         <h1 className="hidden md:block text-lg font-semibold">Todos los Events</h1>
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <div className="flex items-center gap-4 self-end">
-            {role === "admin" && (
-              <FormModal table="events" type="create" />
-            )}
+            {role === "admin" && <FormModal table="events" type="create" />}
           </div>
         </div>
       </div>
+      
+      {/* Search Section */}
+      <div className="my-4 flex gap-4">
+        <input
+          type="text"
+          placeholder="Buscar por nombre"
+          value={searchName}
+          onChange={(e) => setSearchName(e.target.value)}
+          className="border p-2 rounded"
+        />
+        <input
+          type="date"
+          value={searchDate}
+          onChange={(e) => setSearchDate(e.target.value)}
+          className="border p-2 rounded"
+        />
+        <button
+          className="bg-blue-500 text-white px-3 py-2 rounded"
+          onClick={() => setCurrentPage(1)} // Reiniciar a la primera página
+        >
+          Buscar
+        </button>
+      </div>
+
       {/* LIST */}
       <Table columns={columns} renderRow={renderRow} data={currentEvents} />
+
       {/* PAGINATION */}
       <Pagination
         totalPages={totalPages}
         currentPage={currentPage}
-        onPageChange={(page: number) => setCurrentPage(page)} // Actualiza la página actual
+        onPageChange={(page: number) => setCurrentPage(page)} 
       />
     </div>
   );

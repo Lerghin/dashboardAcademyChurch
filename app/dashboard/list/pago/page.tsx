@@ -64,9 +64,17 @@ const columns = [
 const PagoListPage = () => {
   const [pagosData, setPagosData] = useState<Pago[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  
-  // Número de pagos por página
   const pagosPerPage = 10;
+
+  // Estados para filtros
+  const [filters, setFilters] = useState({
+    fecha_pago: "",
+    monto: "",
+    referencia: "",
+    cedula: "",
+  });
+
+  const [filteredData, setFilteredData] = useState<Pago[]>([]);
 
   // Obtener los pagos cuando el componente se monta
   useEffect(() => {
@@ -74,18 +82,63 @@ const PagoListPage = () => {
       const response = await fetch(`${API_URL}pago/get`, { cache: "no-store" });
       const data: Pago[] = await response.json();
       setPagosData(data);
+      setFilteredData(data); // Cargar datos al inicio
     };
 
     fetchPagos();
   }, []);
 
-  // Calcular el rango de pagos a mostrar en base a la página actual
+  // Manejo de cambio en los filtros
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFilters({
+      ...filters,
+      [name]: value,
+    });
+  };
+
+  // Filtrar datos en función de los filtros
+  useEffect(() => {
+    const applyFilters = () => {
+      let results = pagosData;
+
+      if (filters.fecha_pago) {
+        results = results.filter((item) =>
+          item.fecha_pago.includes(filters.fecha_pago)
+        );
+      }
+
+      if (filters.monto) {
+        results = results.filter(
+          (item) => item.monto.toString().includes(filters.monto)
+        );
+      }
+
+      if (filters.referencia) {
+        results = results.filter((item) =>
+          item.referencia.toLowerCase().includes(filters.referencia.toLowerCase())
+        );
+      }
+
+      if (filters.cedula) {
+        results = results.filter((item) =>
+          item.miembro.cedula.includes(filters.cedula)
+        );
+      }
+
+      setFilteredData(results);
+      setCurrentPage(1); // Reiniciar la paginación al aplicar un filtro
+    };
+
+    applyFilters();
+  }, [filters, pagosData]);
+
+  // Paginación lógica
   const indexOfLastPago = currentPage * pagosPerPage;
   const indexOfFirstPago = indexOfLastPago - pagosPerPage;
-  const currentPagos = pagosData.slice(indexOfFirstPago, indexOfLastPago);
+  const currentPagos = filteredData.slice(indexOfFirstPago, indexOfLastPago);
 
-  // Calcular el número total de páginas
-  const totalPages = Math.ceil(pagosData.length / pagosPerPage);
+  const totalPages = Math.ceil(filteredData.length / pagosPerPage);
 
   const renderRow = (item: Pago) => (
     <tr
@@ -111,9 +164,6 @@ const PagoListPage = () => {
               <Image src="/view.png" alt="" width={16} height={16} />
             </button>
           </Link>
-          {role === "admin" && (
-            <FormModal table="pago" type="delete" id={item.idPago} />
-          )}
         </div>
       </td>
     </tr>
@@ -121,26 +171,55 @@ const PagoListPage = () => {
 
   return (
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
-      {/* TOP */}
-      <div className="flex items-center justify-between">
-        <h1 className="hidden md:block text-lg font-semibold">Todos los Pagos</h1>
-        <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
-          <div className="flex items-center gap-4 self-end">
-            {role === "admin" && <FormModal table="pago" type="create" />}
-          </div>
+      {/* FORMULARIO DE FILTRO */}
+      <div className="mb-4 p-2 bg-gray-50 rounded-md">
+        <div className="flex gap-2 md:gap-4">
+          <input
+            name="fecha_pago"
+            type="date"
+            placeholder="Fecha de Pago"
+            className="border p-2 rounded"
+            value={filters.fecha_pago}
+            onChange={handleFilterChange}
+          />
+          <input
+            name="monto"
+            type="number"
+            placeholder="Monto"
+            className="border p-2 rounded"
+            value={filters.monto}
+            onChange={handleFilterChange}
+          />
+          <input
+            name="referencia"
+            type="text"
+            placeholder="Referencia"
+            className="border p-2 rounded"
+            value={filters.referencia}
+            onChange={handleFilterChange}
+          />
+          <input
+            name="cedula"
+            type="text"
+            placeholder="Cédula"
+            className="border p-2 rounded"
+            value={filters.cedula}
+            onChange={handleFilterChange}
+          />
         </div>
       </div>
-      {/* LIST */}
+      
+      {/* LISTADO */}
       <Table columns={columns} renderRow={renderRow} data={currentPagos} />
-      {/* PAGINATION */}
+
+      {/* PAGINACION */}
       <Pagination
         totalPages={totalPages}
         currentPage={currentPage}
-        onPageChange={(page: number) => setCurrentPage(page)} // Actualiza la página actual
+        onPageChange={(page: number) => setCurrentPage(page)}
       />
     </div>
   );
 };
 
 export default PagoListPage;
-

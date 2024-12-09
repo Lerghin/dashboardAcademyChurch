@@ -134,7 +134,10 @@ export default function CreateCoursePage() {
 
         {/* Botones */}
         <div className="flex justify-between mt-6">
-          <button type="reset" className="px-6 py-2 bg-gray-400 text-white rounded-md">
+          <button type="reset" className="px-6 py-2 bg-gray-400 text-white rounded-md"       onClick={() => {
+            
+            window.location.reload(); // Recarga la página
+          }}>
             Limpiar
           </button>
           <button type="submit" className="px-6 py-2 bg-blue-500 text-white rounded-md">

@@ -94,7 +94,10 @@ export default function EditCursoModal({ curso, onClose, onSave }: EditCursoModa
 
         <div className="flex justify-between space-x-4">
           <button
-            onClick={onClose}
+               onClick={() => {
+            
+                window.location.reload(); // Recarga la página
+              }}
             className="px-4 py-2 bg-gray-300 rounded-md text-gray-700 hover:bg-gray-400 w-full"
           >
             Cerrar
