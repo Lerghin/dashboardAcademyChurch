@@ -25,22 +25,47 @@ const NotesPage = () => {
 
   const [notes, setNotes] = useState<NotaMiembroDTO[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [idMo, setIdMo] = useState(childId);
+  const [cedulas, setCedulas] = useState<{ [key: string]: string }>({});
   const [formData, setFormData] = useState({
     idNota: "",
-    idModulo: childId,
+    idModulo: idMo,
     cedula: "",
     nota: "",
   });
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
+    const fetchCedulas = async () => {
+      try {
+        const response = await fetch(`${API_URL}curso/getCedulas/${id}`);
+        if (response.ok) {
+          const data = await response.json();
+          setCedulas(data);
+        } else {
+          console.error("Error al obtener las cédulas");
+        }
+      } catch (error) {
+        console.error("Error en la solicitud:", error);
+      }
+    };
+
+    if (isModalOpen) {
+      fetchCedulas();
+    }
+  }, [isModalOpen, idMo]);
+
+  useEffect(() => {
     const fetchNotes = async () => {
       if (!formData.idModulo) return;
 
       try {
-        const response = await fetch(`${API_URL}nota/getList/${formData.idModulo}`, {
-          cache: "no-store",
-        });
+        const response = await fetch(
+          `${API_URL}nota/getList/${formData.idModulo}`,
+          {
+            cache: "no-store",
+          }
+        );
 
         if (response.ok) {
           const data = await response.json();
@@ -107,7 +132,9 @@ const NotesPage = () => {
     setIsModalOpen(true);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -156,6 +183,7 @@ const NotesPage = () => {
         setNotes([...notes, createdNote]);
         alert("Nota creada satisfactoriamente");
         handleCloseModal();
+        location.reload();
       } else {
         const errorData = await response.json();
         const errorMessage = errorData.message || response.statusText;
@@ -192,16 +220,29 @@ const NotesPage = () => {
               value={formData.idNota}
               onChange={handleInputChange}
             />
+            <input
+              type="hidden"
+              name="idModulo"
+              value={formData.idModulo}
+              onChange={handleInputChange}
+            />
             <div className="mb-4">
               <label className="block text-sm font-medium">Cédula</label>
-              <input
-                type="text"
+              <select
                 name="cedula"
                 value={formData.cedula}
                 onChange={handleInputChange}
                 className="w-full border rounded-md p-2"
-              />
+              >
+                <option value="">Seleccione una cédula</option>
+                {Object.entries(cedulas).map(([cedula, nombre]) => (
+                  <option key={cedula} value={cedula}>
+                    {cedula} - {nombre}
+                  </option>
+                ))}
+              </select>
             </div>
+
             <div className="mb-4">
               <label className="block text-sm font-medium">Nota</label>
               <input

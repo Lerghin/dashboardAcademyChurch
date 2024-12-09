@@ -1,4 +1,6 @@
-'use client'
+'use client';
+
+import { useState, useEffect } from "react";
 import FormModal from "@/app/components/FormModal";
 import Pagination from "@/app/components/Pagination";
 import Table from "@/app/components/Table";
@@ -6,7 +8,6 @@ import { API_URL } from "@/app/lib/config";
 import { role } from "@/app/lib/data";
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect } from "react";
 
 type ProfessorDTO = {
   id: string;
@@ -48,23 +49,31 @@ const columns = [
   },
 ];
 
-const ResultListPage = async () => {
+const ResultListPage = () => {
   const [subjectsData, setSubjectsData] = useState<Subject[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [totalPages, setTotalPages] = useState<number>(1);
 
-  // Función para cargar los datos de los cursos y calcular las páginas
-  const loadSubjectsData = async (page: number) => {
-    const response = await fetch(`${API_URL}curso/getcur?page=${page}`, { cache: "no-store" });
-    const data = await response.json();
-    setSubjectsData(data.subjects);
-    setTotalPages(data.totalPages);
-  };
+  // Número de cursos por página
+  const subjectsPerPage = 10;
 
-  // Cargar los cursos al montar el componente y cuando cambia la página
+  // Obtener todos los cursos al montar el componente
   useEffect(() => {
-    loadSubjectsData(currentPage);
-  }, [currentPage]);
+    const fetchSubjects = async () => {
+      const response = await fetch(`${API_URL}curso/getcur`, { cache: "no-store" });
+      const data = await response.json();
+      setSubjectsData(data);
+    };
+
+    fetchSubjects();
+  }, []);
+
+  // Calcular el rango de datos a mostrar en la página actual
+  const indexOfLastSubject = currentPage * subjectsPerPage;
+  const indexOfFirstSubject = indexOfLastSubject - subjectsPerPage;
+  const currentSubjects = subjectsData.slice(indexOfFirstSubject, indexOfLastSubject);
+
+  // Calcular el número total de páginas
+  const totalPages = Math.ceil(subjectsData.length / subjectsPerPage);
 
   const renderRow = (item: Subject) => (
     <tr
@@ -111,18 +120,18 @@ const ResultListPage = async () => {
         </div>
       </div>
       {/* LIST */}
-      {subjectsData.length > 0 ? (
-        <Table columns={columns} renderRow={renderRow} data={subjectsData} />
+      {currentSubjects.length > 0 ? (
+        <Table columns={columns} renderRow={renderRow} data={currentSubjects} />
       ) : (
         <div className="text-center text-gray-500 py-10">
           <p>No hay cursos todavía agregados.</p>
         </div>
       )}
       {/* PAGINATION */}
-      <Pagination 
-        totalPages={totalPages} 
-        currentPage={currentPage} 
-        setCurrentPage={setCurrentPage} 
+      <Pagination
+        totalPages={totalPages}
+        currentPage={currentPage}
+        onPageChange={(page: number) => setCurrentPage(page)} // Actualiza la página actual
       />
     </div>
   );
