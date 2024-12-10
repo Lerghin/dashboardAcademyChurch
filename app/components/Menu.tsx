@@ -1,6 +1,8 @@
+'use client'
 import { role } from "../lib/data";
 import Image from "next/image";
 import Link from "next/link";
+import { useAuthStore } from "../store/authStore";
 
 const menuItems = [
   {
@@ -60,11 +62,16 @@ const menuItems = [
   {
     title: "OTHER",
     items: [
-    
       {
         icon: "/logout.png",
         label: "Logout",
-        href: "/logout",
+        href: "#", // Evitar enlace directo para manejar el logout
+        visible: ["admin", "teacher", "student", "parent"],
+      },
+      {
+        icon: "/create.png",
+        label: "Registrar Usuario ",
+        href: "/register", // Evitar enlace directo para manejar el logout
         visible: ["admin", "teacher", "student", "parent"],
       },
     ],
@@ -72,6 +79,14 @@ const menuItems = [
 ];
 
 const Menu = () => {
+  const logout = useAuthStore((state) => state.logout); // Obtener función logout
+ // Usar router para redirigir después del logout
+
+  const handleLogout = () => {
+    logout(); // Llamar al logout para limpiar el token
+    window.location.href = "/"; // Redirigir al login o página principal
+  };
+
   return (
     <div className="mt-4 text-sm">
       {menuItems.map((i) => (
@@ -86,6 +101,7 @@ const Menu = () => {
                   href={item.href}
                   key={item.label}
                   className="flex items-center justify-center lg:justify-start gap-4 text-gray-500 py-2 md:px-2 rounded-md hover:bg-lamaSkyLight"
+                  onClick={item.label === "Logout" ? handleLogout : undefined} // Manejar el logout
                 >
                   <Image src={item.icon} alt="" width={20} height={20} />
                   <span className="hidden lg:block">{item.label}</span>

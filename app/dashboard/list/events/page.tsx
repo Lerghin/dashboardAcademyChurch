@@ -8,6 +8,7 @@ import { API_URL } from "@/app/lib/config";
 import { role } from "@/app/lib/data";
 import Image from "next/image";
 import Link from "next/link";
+import { useAuthStore } from "@/app/store/authStore";
 
 type Event = {
   idEvents: string;
@@ -38,10 +39,22 @@ const columns = [
 ];
 
 const EventListPage = () => {
+
+
   const [eventsData, setEventsData] = useState<Event[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchName, setSearchName] = useState(""); // Captura la búsqueda por nombre
   const [searchDate, setSearchDate] = useState(""); // Captura la búsqueda por fecha
+  
+  const token = useAuthStore((state) => state.getToken()); // Obtener el token usando getToken
+  // Inicializa el enrutador para redirigir si no hay token
+ 
+   useEffect(() => {
+     if (!token) {
+       window.location.href = "/"; // Redirige a la página de login si no hay token
+     }
+   }, [token]); // Ejecuta el efecto cada vez que el token cambie
+
 
   const eventsPerPage = 10;
 

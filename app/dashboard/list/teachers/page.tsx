@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Table from "@/app/components/Table";
 import Pagination from "@/app/components/Pagination";
 import { API_URL } from "@/app/lib/config";
+import { useAuthStore } from "@/app/store/authStore";
 
 type Teacher = {
   idProfessor: string;
@@ -34,6 +35,14 @@ const TeacherListPage = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState(""); // Término de búsqueda
 
+  const token = useAuthStore((state) => state.getToken()); // Obtener el token usando getToken
+ // Inicializa el enrutador para redirigir si no hay token
+
+  useEffect(() => {
+    if (!token) {
+      window.location.href = "/"; // Redirige a la página de login si no hay token
+    }
+  }, [token]); // Ejecuta el efecto cada vez que el token cambie
   // Obtener los datos de la API
   const fetchTeachers = async () => {
     try {

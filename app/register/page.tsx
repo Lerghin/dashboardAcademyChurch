@@ -5,15 +5,21 @@ import axios from "axios";
 import { useAuthStore } from "@/app/store/authStore";
 import { API_URL } from "@/app/lib/config";
 
-const LoginPage = () => {
+const RegisterPage = () => {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState(""); // Campo para confirmar la contraseña
   const [errorMessage, setErrorMessage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = async () => {
-    if (!userName || !password) {
+  const handleRegister = async () => {
+    if (!userName || !password || !confirmPassword) {
       setErrorMessage("Por favor, completa todos los campos.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setErrorMessage("Las contraseñas no coinciden.");
       return;
     }
 
@@ -21,7 +27,7 @@ const LoginPage = () => {
     setErrorMessage(null);
 
     try {
-      const response = await axios.post(`${API_URL}auth/login`, {
+      const response = await axios.post(`${API_URL}auth/register`, {
         userName,
         password,
       });
@@ -31,11 +37,11 @@ const LoginPage = () => {
       // Guardar token y usuario en Zustand
       useAuthStore.getState().setToken(token);
 
-      alert("Inicio de sesión exitoso");
-      window.location.href = "/dashboard/admin";
+      alert("Registro exitoso");
+      window.location.href = "/dashboard/admin"; // Redirigir al dashboard después del registro exitoso
     } catch (error) {
-      if (error.response && error.response.status === 401) {
-        setErrorMessage("Credenciales inválidas.");
+      if (error.response && error.response.status === 400) {
+        setErrorMessage("El usuario ya existe.");
       } else {
         setErrorMessage("Error al conectar con el servidor. Intenta nuevamente más tarde.");
       }
@@ -45,10 +51,14 @@ const LoginPage = () => {
     }
   };
 
+  const handleGoBack = () => {
+    window.location.href = "/dashboard/admin"; // Redirigir al dashboard al hacer clic en "Atrás"
+  };
+
   return (
     <>
       <style jsx>{`
-        .login-container {
+        .register-container {
           display: flex;
           align-items: center;
           justify-content: center;
@@ -57,7 +67,7 @@ const LoginPage = () => {
           font-family: Arial, sans-serif;
         }
 
-        .login-box {
+        .register-box {
           background: #ffffff;
           box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
           border-radius: 8px;
@@ -66,7 +76,7 @@ const LoginPage = () => {
           max-width: 400px;
         }
 
-        .login-title {
+        .register-title {
           font-size: 24px;
           font-weight: bold;
           text-align: center;
@@ -109,11 +119,10 @@ const LoginPage = () => {
           box-shadow: 0 0 4px rgba(52, 152, 219, 0.5);
         }
 
-        .login-button {
+        .register-button,
+        .back-button {
           width: 100%;
           padding: 10px;
-          background: #3498db;
-          color: white;
           font-weight: bold;
           font-size: 16px;
           border: none;
@@ -122,21 +131,36 @@ const LoginPage = () => {
           transition: background 0.2s;
         }
 
-        .login-button:hover {
+        .register-button {
+          background: #3498db;
+          color: white;
+        }
+
+        .register-button:hover {
           background: #2980b9;
         }
 
-        .login-button:disabled {
+        .register-button:disabled {
           background: #95a5a6;
           cursor: not-allowed;
         }
 
+        .back-button {
+          background: #95a5a6;
+          color: white;
+          margin-top: 10px;
+        }
+
+        .back-button:hover {
+          background: #7f8c8d;
+        }
+
         @media (max-width: 768px) {
-          .login-box {
+          .register-box {
             padding: 15px;
           }
 
-          .login-title {
+          .register-title {
             font-size: 20px;
           }
 
@@ -144,14 +168,15 @@ const LoginPage = () => {
             font-size: 13px;
           }
 
-          .login-button {
+          .register-button,
+          .back-button {
             font-size: 14px;
           }
         }
       `}</style>
-      <div className="login-container">
-        <div className="login-box">
-          <h2 className="login-title">Inicio de Sesión</h2>
+      <div className="register-container">
+        <div className="register-box">
+          <h2 className="register-title">Registro de Usuario</h2>
 
           {/* Mensaje de error */}
           {errorMessage && <div className="error-message">{errorMessage}</div>}
@@ -186,13 +211,33 @@ const LoginPage = () => {
             />
           </div>
 
-          {/* Botón de Inicio de Sesión */}
+          {/* Campo para confirmar la contraseña */}
+          <div className="form-group">
+            <label className="form-label" htmlFor="confirm-password">
+              Confirmar Contraseña
+            </label>
+            <input
+              type="password"
+              id="confirm-password"
+              placeholder="Confirma tu contraseña"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="form-input"
+            />
+          </div>
+
+          {/* Botón de Registro */}
           <button
-            onClick={handleLogin}
-            className="login-button"
+            onClick={handleRegister}
+            className="register-button"
             disabled={isLoading}
           >
-            {isLoading ? "Cargando..." : "Iniciar Sesión"}
+            {isLoading ? "Cargando..." : "Registrar"}
+          </button>
+
+          {/* Botón de Atrás */}
+          <button onClick={handleGoBack} className="back-button">
+            Atrás
           </button>
         </div>
       </div>
@@ -200,4 +245,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default RegisterPage;

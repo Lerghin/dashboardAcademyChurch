@@ -8,6 +8,7 @@ import { API_URL } from "@/app/lib/config";
 import { role } from "@/app/lib/data";
 import Image from "next/image";
 import Link from "next/link";
+import { useAuthStore } from "@/app/store/authStore";
 
 // Define el tipo para la estructura de datos.
 type Student = {
@@ -39,6 +40,14 @@ const StudentListPage = () => {
   const itemsPerPage = 5; // Cantidad de elementos por página
   const [searchTerm, setSearchTerm] = useState(""); // Término de búsqueda
 
+  const token = useAuthStore((state) => state.getToken()); // Obtener el token usando getToken
+ // Inicializa el enrutador para redirigir si no hay token
+
+  useEffect(() => {
+    if (!token) {
+      window.location.href = "/"; // Redirige a la página de login si no hay token
+    }
+  }, [token]); // Ejecuta el efecto cada vez que el token cambie
   // Simulación de datos cargados desde la API.
   useEffect(() => {
     const fetchData = async () => {
