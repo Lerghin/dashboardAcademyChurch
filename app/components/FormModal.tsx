@@ -8,11 +8,10 @@ import EditEventModal from "./forms/EditEventModalProps";
 import CreateEventModal from "./forms/CreateEventModal";
 import CreatePagoModal from "./forms/CreatePago";
 
-
+// Dynamically import forms with loading state
 const CursoForm = dynamic(() => import("./forms/FormCrearCurso"), {
   loading: () => <h1>Loading...</h1>,
 });
-
 const TeacherForm = dynamic(() => import("./forms/TeacherForm"), {
   loading: () => <h1>Loading...</h1>,
 });
@@ -23,15 +22,16 @@ const GroupsForm = dynamic(() => import("./forms/GroupsForm"), {
   loading: () => <h1>Loading...</h1>,
 });
 
+// Form map for dynamic rendering
 const forms: {
   [key: string]: (type: "create" | "update", data?: any) => JSX.Element;
 } = {
   teacher: (type, data) => <TeacherForm type={type} data={data} />,
   student: (type, data) => <StudentForm type={type} data={data} />,
-  group: (type, data) => <GroupsForm type={type} data={data}/>,
-  curso: (type, data) => <CursoForm type={type} data={data}/>,
-  events: (type, data) => <CreateEventModal type={type} data={data}/>,
-  pago: (type, data) => <CreatePagoModal type={type} data={data}/>
+  group: (type, data) => <GroupsForm type={type} data={data} />,
+  curso: (type, data) => <CursoForm type={type} data={data} />,
+  events: (type, data) => <CreateEventModal type={type} data={data} />,
+  pago: (type, data) => <CreatePagoModal type={type} data={data} />,
 };
 
 const FormModal = ({
@@ -41,9 +41,9 @@ const FormModal = ({
   id,
 }: {
   table:
-  "events"
-   | "miembro"
-   | "curso"
+    | "events"
+    | "miembro"
+    | "curso"
     | "profe"
     | "teacher"
     | "student"
@@ -57,7 +57,7 @@ const FormModal = ({
     | "result"
     | "attendance"
     | "event"
-    |  "pago"
+    | "pago";
   type: "create" | "update" | "delete";
   data?: any;
   id?: string;
@@ -72,41 +72,46 @@ const FormModal = ({
 
   const [open, setOpen] = useState(false);
 
-
+  // Handle delete action
   const handleDelete = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault(); // Prevenir comportamiento predeterminado
+    e.preventDefault(); // Prevent default form submission behavior
     try {
       const response = await fetch(`${API_URL}${table}/delete/${id}`, {
         method: "DELETE",
       });
-  
+
       if (!response.ok) {
-        throw new Error("Error al eliminar el profesor.");
+        throw new Error("Error deleting item.");
       }
-  
-      console.log("Eliminación exitosa");
-      // Refrescar estado o lista tras eliminar
-      window.location.reload();
+
+      console.log("Deletion successful");
+      // Instead of reloading, update local state or trigger a refetch
+      setOpen(false); // Close modal on successful delete
     } catch (err: any) {
       console.error("Error:", err.message || err);
     }
   };
 
   const Form = () => {
-    return type === "delete" && id ? (
-      <form action="" className="p-4 flex flex-col gap-4">
-        <span className="text-center font-medium">
-          Esta seguro de borrar  {table}?
-        </span>
-        <button className="bg-red-700 text-white py-2 px-4 rounded-md border-none w-max self-center" onClick={handleDelete}>
-          Delete
-        </button>
-      </form>
-    ) : type === "create" || type === "update" ? (
-      forms[table](type, data)
-    ) : (
-      "Form not found!"
-    );
+    if (type === "delete" && id) {
+      return (
+        <form action="" className="p-4 flex flex-col gap-4">
+          <span className="text-center font-medium">
+            Are you sure you want to delete {table}?
+          </span>
+          <button
+            className="bg-red-700 text-white py-2 px-4 rounded-md border-none w-max self-center"
+            onClick={handleDelete}
+          >
+            Delete
+          </button>
+        </form>
+      );
+    } else if (type === "create" || type === "update") {
+      return forms[table](type, data);
+    } else {
+      return "Form not found!";
+    }
   };
 
   return (
