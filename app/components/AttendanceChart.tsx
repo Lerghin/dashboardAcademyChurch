@@ -1,37 +1,40 @@
-'use client'
-import { useEffect, useState } from "react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import Image from "next/image";
-import { API_URL } from "../lib/config";
+'use client';
+import { useEffect, useState } from 'react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import Image from 'next/image';
+import { API_URL } from '../lib/config';
+
+// Define the type for the data you expect
+type ChartData = {
+  name: string;
+  cantidad: number;
+};
 
 const AttendanceChart = () => {
-  const [data, setData] = useState([]);
+  // Define the state with the correct type
+  const [data, setData] = useState<ChartData[]>([]);
 
   useEffect(() => {
-    // Obtener la distribución de edad desde el backend
+    // Fetch data from the backend
     const fetchData = async () => {
       try {
-        // Hacer la solicitud con fetch a la API
         const response = await fetch(`${API_URL}miembro/distribucion-edad`);
         
-        // Comprobar si la respuesta fue exitosa
         if (!response.ok) {
           throw new Error('Error al obtener los datos');
         }
 
-        // Parsear la respuesta JSON
         const data = await response.json();
         
-        // Convertir los datos a un formato adecuado para Recharts
-        const chartData = Object.keys(data).map(key => ({
+        // Map the fetched data to the structure expected by Recharts
+        const chartData: ChartData[] = Object.keys(data).map(key => ({
           name: key,
           cantidad: data[key]
         }));
         
-        // Guardar los datos en el estado
         setData(chartData);
       } catch (error) {
-        console.error("Error fetching data: ", error);
+        console.error('Error fetching data: ', error);
       }
     };
 
@@ -54,13 +57,11 @@ const AttendanceChart = () => {
             tickLine={false}
           />
           <YAxis axisLine={false} tick={{ fill: "#d1d5db" }} tickLine={false} />
-          <Tooltip
-            contentStyle={{ borderRadius: "10px", borderColor: "lightgray" }}
-          />
+          <Tooltip contentStyle={{ borderRadius: '10px', borderColor: 'lightgray' }} />
           <Legend
             align="left"
             verticalAlign="top"
-            wrapperStyle={{ paddingTop: "20px", paddingBottom: "40px" }}
+            wrapperStyle={{ paddingTop: '20px', paddingBottom: '40px' }}
           />
           <Bar
             dataKey="cantidad"
