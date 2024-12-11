@@ -1,6 +1,6 @@
 "use client";
 
-
+import AttendanceChart from "@/app/components/AttendanceChart";
 import CountChart from "@/app/components/CountChart";
 import EventCalendar from "@/app/components/EventCalendar";
 import FinanceChart from "@/app/components/FinanceChart";
@@ -69,7 +69,7 @@ const AdminPage = () => {
           </div>
           {/* ATTENDANCE CHART */}
           <div className="w-full lg:w-2/3 h-[450px]">
-         
+            <AttendanceChart />
           </div>
         </div>
         {/* BOTTOM CHART */}
