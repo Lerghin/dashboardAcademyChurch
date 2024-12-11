@@ -8,10 +8,11 @@ import EditEventModal from "./forms/EditEventModalProps";
 import CreateEventModal from "./forms/CreateEventModal";
 import CreatePagoModal from "./forms/CreatePago";
 
-// Dynamically import forms with loading state
+// Carga dinámica de los formularios
 const CursoForm = dynamic(() => import("./forms/FormCrearCurso"), {
   loading: () => <h1>Loading...</h1>,
 });
+
 const TeacherForm = dynamic(() => import("./forms/TeacherForm"), {
   loading: () => <h1>Loading...</h1>,
 });
@@ -22,18 +23,20 @@ const GroupsForm = dynamic(() => import("./forms/GroupsForm"), {
   loading: () => <h1>Loading...</h1>,
 });
 
-// Form map for dynamic rendering
-const forms: {
-  [key: string]: (type: "create" | "update", data?: any) => JSX.Element;
-} = {
+// Tipos permitidos para los formularios
+type TableType = "teacher" | "student" | "group" | "curso" | "events" | "pago";
+
+// Objeto que almacena los formularios
+const forms: { [key in TableType]: (type: "create" | "update", data?: any) => JSX.Element } = {
   teacher: (type, data) => <TeacherForm type={type} data={data} />,
   student: (type, data) => <StudentForm type={type} data={data} />,
   group: (type, data) => <GroupsForm type={type} data={data} />,
   curso: (type, data) => <CursoForm type={type} data={data} />,
   events: (type, data) => <CreateEventModal type={type} data={data} />,
-  pago: (type, data) => <CreatePagoModal type={type} data={data} />,
+  pago: (type, data) => <CreatePagoModal type={type} data={data} />
 };
 
+// Componente modal de formularios
 const FormModal = ({
   table,
   type,
@@ -72,46 +75,58 @@ const FormModal = ({
 
   const [open, setOpen] = useState(false);
 
-  // Handle delete action
+  // Maneja la eliminación de un registro
   const handleDelete = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault(); // Prevent default form submission behavior
+    e.preventDefault(); // Prevenir comportamiento predeterminado
     try {
       const response = await fetch(`${API_URL}${table}/delete/${id}`, {
         method: "DELETE",
       });
 
       if (!response.ok) {
-        throw new Error("Error deleting item.");
+        throw new Error("Error al eliminar el registro.");
       }
 
-      console.log("Deletion successful");
-      // Instead of reloading, update local state or trigger a refetch
-      setOpen(false); // Close modal on successful delete
+      console.log("Eliminación exitosa");
+      setOpen(false); // Cierra el modal tras la eliminación
+      // Aquí podrías actualizar el estado local para eliminar el elemento sin recargar
     } catch (err: any) {
       console.error("Error:", err.message || err);
     }
   };
 
+  // Verifica si la tabla es válida antes de mostrar el formulario
   const Form = () => {
-    if (type === "delete" && id) {
-      return (
-        <form action="" className="p-4 flex flex-col gap-4">
-          <span className="text-center font-medium">
-            Are you sure you want to delete {table}?
-          </span>
-          <button
-            className="bg-red-700 text-white py-2 px-4 rounded-md border-none w-max self-center"
-            onClick={handleDelete}
-          >
-            Delete
-          </button>
-        </form>
-      );
-    } else if (type === "create" || type === "update") {
-      return forms[table](type, data);
-    } else {
-      return "Form not found!";
+    const validTables: TableType[] = [
+      "teacher",
+      "student",
+      "group",
+      "curso",
+      "events",
+      "pago",
+    ];
+
+    if (!validTables.includes(table as TableType)) {
+      return <div>Form not found!</div>;
     }
+
+    return type === "delete" && id ? (
+      <form action="" className="p-4 flex flex-col gap-4">
+        <span className="text-center font-medium">
+          ¿Está seguro de borrar {table}?
+        </span>
+        <button
+          className="bg-red-700 text-white py-2 px-4 rounded-md border-none w-max self-center"
+          onClick={handleDelete}
+        >
+          Delete
+        </button>
+      </form>
+    ) : type === "create" || type === "update" ? (
+      forms[table as TableType](type, data)
+    ) : (
+      "Form not found!"
+    );
   };
 
   return (

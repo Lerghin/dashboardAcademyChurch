@@ -5,6 +5,7 @@ import Table from "@/app/components/Table";
 import Pagination from "@/app/components/Pagination";
 import { API_URL } from "@/app/lib/config";
 import { useAuthStore } from "@/app/store/authStore";
+import FormModal from "@/app/components/FormModal";
 
 type Teacher = {
   idProfessor: string;
@@ -122,10 +123,16 @@ const TeacherListPage = () => {
             placeholder="Buscar por nombre, apellido o cédula"
           />
         </div>
+        <div className="flex items-center gap-4 self-end">
+            
+              <FormModal table="student" type="create" />
+          
+          </div>
       </div>
 
       {/* Tabla con datos paginados */}
       <Table columns={columns} renderRow={renderRow} data={getPaginatedData()} />
+
 
       {/* Componente de paginación */}
       <Pagination
