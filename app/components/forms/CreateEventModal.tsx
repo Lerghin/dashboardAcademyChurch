@@ -41,10 +41,10 @@ const CreateEventModal: React.FC<FormModalProps> = ({ table, type, onClose, onSa
 
   const handleSubmit = async () => {
     const eventPayload = { nameEvents, description, fecha_inicio };
-
+  
     try {
       let response;
-
+  
       if (type === "update" && id) {
         response = await fetch(`${API_URL}${table}/update/${id}`, {
           method: "PUT",
@@ -58,19 +58,24 @@ const CreateEventModal: React.FC<FormModalProps> = ({ table, type, onClose, onSa
           body: JSON.stringify(eventPayload),
         });
       }
-
+  
       if (!response.ok) {
         throw new Error("Error al guardar el evento");
       }
-
+  
       const savedEvent = await response.text();
-
+  
       // Llama la función onSave si es necesario
       window.location.reload(); // Recarga la página para reflejar los cambios
     } catch (err) {
-      alert(`Error: ${err.message}`);
+      if (err instanceof Error) {
+        alert(`Error: ${err.message}`);
+      } else {
+        alert("An unknown error occurred");
+      }
     }
   };
+  
 
   return (
     <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
