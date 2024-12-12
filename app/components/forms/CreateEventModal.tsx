@@ -9,12 +9,11 @@ interface Event {
 }
 
 interface FormModalProps {
-  table: string;
-  type: "create" | "update"; 
-  onClose: () => void;
-  onSave: (event: Event) => void;
+
+  type: string; 
+
   id?: string;
-  data?: Event; 
+  data?: any;
 }
 
 const CreateEventModal: React.FC<FormModalProps> = ({ table, type, onClose, onSave, id, data }) => {

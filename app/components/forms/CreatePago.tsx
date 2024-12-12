@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { API_URL } from "@/app/lib/config";
 
 // Interfaz de las props
 interface FormProps {
   table: string;
-  onClose: () => void;
-  onSave: (pago: Pago) => void;
+  type: "create" | "update";  // Aquí se define si es para crear o editar
+  data?: Pago;  // En caso de ser edición, se pasan los datos del pago
 }
 
 interface Pago {
@@ -21,14 +21,16 @@ interface Miembro {
   cedula: string;
 }
 
-const CreatePagoModal: React.FC<FormProps> = ({ table, onClose, onSave }) => {
-  const [cedula, setCedula] = useState<string>("");
-  const [fecha_pago, setFechaPago] = useState<string>("");
-  const [metodoPago, setMetodoPago] = useState<string>("");
-  const [referencia, setReferencia] = useState<string>("");
-  const [observacion, setObservacion] = useState<string>("");
-  const [monto, setMonto] = useState<number>(0);
+const CreatePagoModal: React.FC<FormProps> = ({ table, onClose, onSave, type, data }) => {
+  // Definir el estado de los campos del formulario
+  const [cedula, setCedula] = useState<string>(data?.miembro?.cedula || "");
+  const [fecha_pago, setFechaPago] = useState<string>(data?.fecha_pago || "");
+  const [metodoPago, setMetodoPago] = useState<string>(data?.metodoPago || "");
+  const [referencia, setReferencia] = useState<string>(data?.referencia || "");
+  const [observacion, setObservacion] = useState<string>(data?.observacion || "");
+  const [monto, setMonto] = useState<number>(data?.monto || 0);
 
+  // Manejar el envío del formulario
   const handleSubmit = async () => {
     const pagoPayload: Pago = {
       miembro: { cedula },
@@ -40,8 +42,8 @@ const CreatePagoModal: React.FC<FormProps> = ({ table, onClose, onSave }) => {
     };
 
     try {
-      const response = await fetch(`${API_URL}pago/create`, {
-        method: "POST",
+      const response = await fetch(`${API_URL}pago/${type}`, {  // Usar el tipo para determinar la URL (create o edit)
+        method: type === "create" ? "POST" : "PUT",  // POST para crear, PUT para editar
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(pagoPayload),
       });
@@ -51,17 +53,29 @@ const CreatePagoModal: React.FC<FormProps> = ({ table, onClose, onSave }) => {
       }
 
       const savedPago = await response.text();
-      onSave(savedPago); // Llamar al callback onSave
-      onClose(); // Cerrar el modal
+      onSave(savedPago);  // Llamar al callback onSave con el pago guardado
+      onClose();  // Cerrar el modal
     } catch (err) {
       alert(`Error: ${err.message}`);
     }
   };
 
+  useEffect(() => {
+    // Si el tipo es editar, establecer los datos del pago en los estados
+    if (type === "edit" && data) {
+      setCedula(data.miembro.cedula);
+      setFechaPago(data.fecha_pago);
+      setMetodoPago(data.metodoPago);
+      setReferencia(data.referencia);
+      setObservacion(data.observacion);
+      setMonto(data.monto);
+    }
+  }, [type, data]);
+
   return (
     <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-lg w-96">
-        <h2 className="text-xl font-semibold mb-4">Crear Pago</h2>
+        <h2 className="text-xl font-semibold mb-4">{type === "create" ? "Crear Pago" : "Editar Pago"}</h2>
 
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700">Cédula del Miembro</label>
@@ -124,7 +138,7 @@ const CreatePagoModal: React.FC<FormProps> = ({ table, onClose, onSave }) => {
 
         <div className="flex justify-between">
           <button
-            onClick={onClose} // Usar onClose para cerrar el modal
+            onClick={onClose}  // Usar onClose para cerrar el modal
             className="px-4 py-2 bg-gray-300 rounded-md text-gray-700 hover:bg-gray-400"
           >
             Cancelar
@@ -133,7 +147,7 @@ const CreatePagoModal: React.FC<FormProps> = ({ table, onClose, onSave }) => {
             onClick={handleSubmit}
             className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
           >
-            Crear
+            {type === "create" ? "Crear" : "Guardar"}
           </button>
         </div>
       </div>
