@@ -1,17 +1,24 @@
 'use client';
 
 import { useState } from 'react';
-import { API_URL } from '@/app/lib/config'; 
-export default function CreateProfessorPage() {
+import { API_URL } from '@/app/lib/config';
+
+// Interfaz para las propiedades del formulario de Profesor
+interface TeacherFormProps {
+  type: "create" | "update"; // Tipo de acción (crear o actualizar)
+  data?: any; // Datos del profesor, si hay (solo para "update")
+}
+
+const TeacherForm = ({ type, data }: TeacherFormProps) => {
   const [formData, setFormData] = useState({
-    name: '',
-    lastName: '',
-    email: '',
-    address: '',
-    cedula: '',
-    phone: '',
-    fecha_nacimiento: '',
-    cursos: [''], // Lista de cursos
+    name: data?.name || '',
+    lastName: data?.lastName || '',
+    email: data?.email || '',
+    address: data?.address || '',
+    cedula: data?.cedula || '',
+    phone: data?.phone || '',
+    fecha_nacimiento: data?.fecha_nacimiento || '',
+    cursos: data?.cursos || [''], // Lista de cursos
   });
 
   const [error, setError] = useState<string | null>(null);
@@ -83,7 +90,7 @@ export default function CreateProfessorPage() {
     <div className="w-full">
       <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden w-full">
         <div className="p-6 md:p-8">
-          <h2 className="text-2xl font-semibold mb-4 text-blue-700">Crear Profesor</h2>
+          <h2 className="text-2xl font-semibold mb-4 text-blue-700">{type === 'create' ? 'Crear Profesor' : 'Actualizar Profesor'}</h2>
 
           {/* Mensajes de éxito o error */}
           {success && <div className="bg-green-200 p-4 mb-4 text-green-800 rounded-md">{success}</div>}
@@ -199,7 +206,7 @@ export default function CreateProfessorPage() {
                 Limpiar
               </button>
               <button type="submit" className="px-6 py-2 bg-blue-500 text-white rounded-md">
-                Crear Profesor
+                {type === 'create' ? 'Crear Profesor' : 'Actualizar Profesor'}
               </button>
             </div>
           </form>
@@ -207,4 +214,6 @@ export default function CreateProfessorPage() {
       </div>
     </div>
   );
-}
+};
+
+export default TeacherForm;
