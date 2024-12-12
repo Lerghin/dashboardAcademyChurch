@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { API_URL } from "@/app/lib/config";
-
 // Interfaz de las props
 interface FormProps {
-  table:string
+  table: string;
   type: string;  // Aquí se define si es para crear o editar
   data?: Pago;  // En caso de ser edición, se pasan los datos del pago
+  onClose: () => void;  // Asegúrate de definir onClose
+  onSave: (savedPago: string) => void;  // Define el tipo de onSave
 }
 
 interface Pago {
@@ -56,7 +57,11 @@ const CreatePagoModal: React.FC<FormProps> = ({ table, onClose, onSave, type, da
       onSave(savedPago);  // Llamar al callback onSave con el pago guardado
       onClose();  // Cerrar el modal
     } catch (err) {
-      alert(`Error: ${err.message}`);
+      if (err instanceof Error) {
+        alert(`Error: ${err.message}`);
+      } else {
+        alert("An unknown error occurred");
+      }
     }
   };
 
