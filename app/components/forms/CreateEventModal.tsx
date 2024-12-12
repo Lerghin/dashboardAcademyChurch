@@ -1,23 +1,17 @@
 import { API_URL } from "@/app/lib/config";
 import { useState, useEffect } from "react";
 
-interface Event {
-  eventId: string;
-  nameEvents: string;
-  description: string;
-  fecha_inicio: string;
-}
-
+// Definición de las propiedades que acepta el componente
 interface FormModalProps {
-
-  type: string; 
-  table:string
+  type: string;
+  table: string;
   id?: string;
   data?: any;
+  onClose?: () => void; // Agregado onClose aquí
+  onSave?: () => void;
 }
 
 const CreateEventModal: React.FC<FormModalProps> = ({ table, type, onClose, onSave, id, data }) => {
-   
   const [nameEvents, setNameEvents] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [fecha_inicio, setFechaInicio] = useState<string>("");
@@ -115,7 +109,7 @@ const CreateEventModal: React.FC<FormModalProps> = ({ table, type, onClose, onSa
         <div className="flex justify-between">
           <button
             onClick={() => {
-            
+              if (onClose) onClose(); // Llamar onClose si se pasa como propiedad
               window.location.reload(); // Recarga la página
             }}
             className="px-4 py-2 bg-gray-300 rounded-md text-gray-700 hover:bg-gray-400"
