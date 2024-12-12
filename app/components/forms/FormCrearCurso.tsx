@@ -13,6 +13,7 @@ interface DynamicSectionProps {
 interface StudentFormProps {
   type: "create" | "update";  // O cualquier otro tipo que estés utilizando
   data?: any;  // Ajusta esto según los datos que estás pasando
+  table:string
 }
 
 const CreateCoursePage: React.FC<StudentFormProps> = ({ type, data }) => {

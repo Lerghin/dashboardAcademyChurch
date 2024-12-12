@@ -3,8 +3,8 @@ import { API_URL } from "@/app/lib/config";
 
 // Interfaz de las props
 interface FormProps {
-  table: string;
-  type: "create" | "update";  // Aquí se define si es para crear o editar
+  table:string
+  type: string;  // Aquí se define si es para crear o editar
   data?: Pago;  // En caso de ser edición, se pasan los datos del pago
 }
 

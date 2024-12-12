@@ -11,7 +11,7 @@ interface Event {
 interface FormModalProps {
 
   type: string; 
-
+  table:string
   id?: string;
   data?: any;
 }
