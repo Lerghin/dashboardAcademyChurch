@@ -28,12 +28,12 @@ type TableType = "teacher" | "student" | "group" | "curso" | "events" | "pago";
 
 // Objeto que almacena los formularios
 const forms: { [key in TableType]: (type: "create" | "update", data?: any) => JSX.Element } = {
-  teacher: (type, data) => <TeacherForm type={type} data={data} />,
-  student: (type, data) => <StudentForm type={type} data={data} />,
-  group: (type, data) => <GroupsForm type={type} data={data} />,
-  curso: (type, data) => <CursoForm type={type} data={data} />,
-  events: (type, data) => <CreateEventModal type={type} data={data} />,
-  pago: (type, data) => <CreatePagoModal type={type} data={data} />
+  teacher: (type, data) => <TeacherForm />,
+  student: (type, data) => <StudentForm   />,
+  group: (type, data) => <GroupsForm   />,
+  curso: (type, data) => <CursoForm  />,
+  events: (type, data) => <CreateEventModal />,
+  pago: (type, data) => <CreatePagoModal  />
 };
 
 // Componente modal de formularios
@@ -98,6 +98,7 @@ const FormModal = ({
   // Verifica si la tabla es válida antes de mostrar el formulario
   const Form = () => {
     const validTables: TableType[] = [
+      
       "teacher",
       "student",
       "group",
