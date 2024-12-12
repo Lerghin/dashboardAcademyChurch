@@ -8,7 +8,7 @@ import { useAuthStore } from "../store/authStore";
 const Navbar = () => {
     const [userName, setUserName] = useState(""); // Nombre del usuario
     const [loading, setLoading] = useState(true); // Estado de carga
-    const [error, setError] = useState(null); // Estado de error
+    const [error, setError] = useState<string | null>(null); // Estado de error, ahora con tipo string | null
     const token = useAuthStore((state) => state.token);
     const isTokenReady = useAuthStore((state) => state.isTokenReady);
 
@@ -35,8 +35,12 @@ const Navbar = () => {
 
                 const username = await response.text(); // El backend devuelve el username como texto
                 setUserName(username);
-            } catch (error) {
-                setError(error.message);
+            } catch (error: unknown) {
+                if (error instanceof Error) {
+                    setError(error.message); // Ahora TypeScript sabe que `error` es una instancia de `Error`
+                } else {
+                    setError("Error desconocido");
+                }
             } finally {
                 setLoading(false); // Detener el estado de carga
             }
