@@ -1,26 +1,37 @@
 'use client';
 
 import { API_URL } from '@/app/lib/config';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-export default function CreateGroupsPage() {
-  const [numeroGrupo, setNumeroGrupo] = useState('');
-  const [cedula, setCedula] = useState('');
+// Definimos la interfaz para las propiedades del componente
+interface CreateGroupsPageProps {
+  type: 'create' | 'update'; // Tipo de formulario: crear o editar
+  data?: { numeroGrupo: string; miembros: { cedula: string }[] }; // Datos para editar el grupo
+}
+
+const CreateGroupsPage: React.FC<CreateGroupsPageProps> = ({ type, data }) => {
+  const [numeroGrupo, setNumeroGrupo] = useState<string>('');
+  const [cedula, setCedula] = useState<string>('');
   const [miembroList, setMiembroList] = useState<{ cedula: string }[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  // Maneja cambios en el número del grupo
+  // Si estamos editando, inicializamos los valores con los datos recibidos
+  useEffect(() => {
+    if (type === 'edit' && data) {
+      setNumeroGrupo(data.numeroGrupo);
+      setMiembroList(data.miembros);
+    }
+  }, [type, data]);
+
   const handleNumeroGrupoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNumeroGrupo(e.target.value);
   };
 
-  // Maneja cambios en el campo de cédula
   const handleCedulaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCedula(e.target.value);
   };
 
-  // Agrega un miembro a la lista
   const handleAddMember = () => {
     if (!cedula || miembroList.some((m) => m.cedula === cedula)) {
       setError('Ingrese una cédula válida y que no esté repetida');
@@ -31,12 +42,10 @@ export default function CreateGroupsPage() {
     setError(null);
   };
 
-  // Elimina un miembro de la lista
   const handleRemoveMember = (cedulaToRemove: string) => {
     setMiembroList(miembroList.filter((m) => m.cedula !== cedulaToRemove));
   };
 
-  // Maneja el envío del formulario
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!numeroGrupo || miembroList.length === 0) {
@@ -45,21 +54,21 @@ export default function CreateGroupsPage() {
     }
 
     try {
-      const response = await fetch(`${API_URL}grupo/create`, {
+      const response = await fetch(`${API_URL}grupo/${type === 'edit' ? 'update' : 'create'}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ numeroGrupo, miembroList }),
       });
 
-      if (!response.ok) throw new Error('Error al crear el grupo');
+      if (!response.ok) throw new Error('Error al crear o actualizar el grupo');
 
       setNumeroGrupo('');
       setMiembroList([]);
-      setSuccess('Grupo creado con éxito');
+      setSuccess('Grupo ' + (type === 'edit' ? 'actualizado' : 'creado') + ' con éxito');
       setError(null);
     } catch (err) {
       console.error(err);
-      setError('Hubo un problema al crear el grupo');
+      setError('Hubo un problema al ' + (type === 'edit' ? 'actualizar' : 'crear') + ' el grupo');
       setSuccess(null);
     }
   };
@@ -69,15 +78,13 @@ export default function CreateGroupsPage() {
       <div className="max-w-lg mx-auto bg-white shadow-lg rounded-lg overflow-hidden w-full">
         <div className="p-6 md:p-8">
           <h2 className="text-2xl font-semibold mb-4 text-blue-700">
-            Crear Nuevo Grupo
+            {type === 'edit' ? 'Editar Grupo' : 'Crear Nuevo Grupo'}
           </h2>
 
-          {/* Mensajes de éxito o error */}
           {success && <div className="bg-green-200 p-4 mb-4 text-green-800 rounded-md">{success}</div>}
           {error && <div className="bg-red-200 p-4 mb-4 text-red-800 rounded-md">{error}</div>}
 
           <form onSubmit={handleSubmit}>
-            {/* Campo para el número del grupo */}
             <div className="mb-4">
               <input
                 type="text"
@@ -89,7 +96,6 @@ export default function CreateGroupsPage() {
               />
             </div>
 
-            {/* Campo para la cédula */}
             <div className="mb-4 flex gap-2">
               <input
                 type="text"
@@ -108,7 +114,6 @@ export default function CreateGroupsPage() {
               </button>
             </div>
 
-            {/* Lista de miembros */}
             <div className="mb-4">
               <h3 className="font-semibold mb-2">Miembros Agregados:</h3>
               <ul className="list-disc pl-5">
@@ -127,7 +132,6 @@ export default function CreateGroupsPage() {
               </ul>
             </div>
 
-            {/* Botones */}
             <div className="flex justify-between mt-6">
               <button
                 type="button"
@@ -143,7 +147,7 @@ export default function CreateGroupsPage() {
                 type="submit"
                 className="px-6 py-2 bg-blue-500 text-white rounded-md"
               >
-                Crear Grupo
+                {type === 'edit' ? 'Actualizar Grupo' : 'Crear Grupo'}
               </button>
             </div>
           </form>
@@ -151,4 +155,6 @@ export default function CreateGroupsPage() {
       </div>
     </div>
   );
-}
+};
+
+export default CreateGroupsPage;

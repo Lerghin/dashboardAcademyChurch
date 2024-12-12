@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useState } from "react";
 import { API_URL } from "../lib/config";
+import EditEventModal from "./forms/EditEventModalProps";
 import CreateEventModal from "./forms/CreateEventModal";
 import CreatePagoModal from "./forms/CreatePago";
 
@@ -26,13 +27,13 @@ const GroupsForm = dynamic(() => import("./forms/GroupsForm"), {
 type TableType = "teacher" | "student" | "group" | "curso" | "events" | "pago";
 
 // Objeto que almacena los formularios
-const forms: { [key in TableType]: (type: "create", data?: any) => JSX.Element } = {
+const forms: { [key in TableType]: (type: "create" | "update", data?: any) => JSX.Element } = {
   teacher: (type, data) => <TeacherForm type={type} data={data} />,
   student: (type, data) => <StudentForm type={type} data={data} />,
   group: (type, data) => <GroupsForm type={type} data={data} />,
   curso: (type, data) => <CursoForm type={type} data={data} />,
   events: (type, data) => <CreateEventModal type={type} data={data} />,
-  pago: (type, data) => <CreatePagoModal type={type} data={data} />,
+  pago: (type, data) => <CreatePagoModal type={type} data={data} />
 };
 
 // Componente modal de formularios
@@ -40,21 +41,59 @@ const FormModal = ({
   table,
   type,
   data,
+  id,
 }: {
   table:
+    | "events"
+    | "miembro"
+    | "curso"
+    | "profe"
     | "teacher"
     | "student"
     | "group"
-    | "curso"
-    | "events"
+    | "grupo"
+    | "subject"
+    | "class"
+    | "lesson"
+    | "exam"
+    | "assignment"
+    | "result"
+    | "attendance"
+    | "event"
     | "pago";
-  type: "create";
+  type: "create" | "update" | "delete";
   data?: any;
+  id?: string;
 }) => {
   const size = type === "create" ? "w-8 h-8" : "w-7 h-7";
-  const bgColor = type === "create" ? "bg-lamaYellow" : "bg-lamaSky"; // Solo color para 'create'
+  const bgColor =
+    type === "create"
+      ? "bg-lamaYellow"
+      : type === "update"
+      ? "bg-lamaSky"
+      : "bg-lamaPurple";
 
   const [open, setOpen] = useState(false);
+
+  // Maneja la eliminación de un registro
+  const handleDelete = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault(); // Prevenir comportamiento predeterminado
+    try {
+      const response = await fetch(`${API_URL}${table}/delete/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Error al eliminar el registro.");
+      }
+
+      console.log("Eliminación exitosa");
+      setOpen(false); // Cierra el modal tras la eliminación
+      // Aquí podrías actualizar el estado local para eliminar el elemento sin recargar
+    } catch (err: any) {
+      console.error("Error:", err.message || err);
+    }
+  };
 
   // Verifica si la tabla es válida antes de mostrar el formulario
   const Form = () => {
@@ -71,8 +110,19 @@ const FormModal = ({
       return <div>Form not found!</div>;
     }
 
-    // Solo mostramos el formulario de creación
-    return type === "create" ? (
+    return type === "delete" && id ? (
+      <form action="" className="p-4 flex flex-col gap-4">
+        <span className="text-center font-medium">
+          ¿Está seguro de borrar {table}?
+        </span>
+        <button
+          className="bg-red-700 text-white py-2 px-4 rounded-md border-none w-max self-center"
+          onClick={handleDelete}
+        >
+          Delete
+        </button>
+      </form>
+    ) : type === "create" || type === "update" ? (
       forms[table as TableType](type, data)
     ) : (
       "Form not found!"

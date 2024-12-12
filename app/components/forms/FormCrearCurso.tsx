@@ -3,7 +3,19 @@
 import { useState } from 'react';
 import { API_URL } from '@/app/lib/config';
 
-export default function CreateCoursePage() {
+interface DynamicSectionProps {
+  title: string;
+  list: any[];
+  setList: React.Dispatch<React.SetStateAction<any[]>>;
+  fields: { key: string, label: string }[];
+}
+
+interface StudentFormProps {
+  type: "create" | "update";  // O cualquier otro tipo que estés utilizando
+  data?: any;  // Ajusta esto según los datos que estás pasando
+}
+
+const CreateCoursePage: React.FC<StudentFormProps> = ({ type, data }) => {
   const [curso, setCurso] = useState({
     nombreCurso: '',
     descripcion: '',
@@ -134,8 +146,7 @@ export default function CreateCoursePage() {
 
         {/* Botones */}
         <div className="flex justify-between mt-6">
-          <button type="reset" className="px-6 py-2 bg-gray-400 text-white rounded-md"       onClick={() => {
-            
+          <button type="reset" className="px-6 py-2 bg-gray-400 text-white rounded-md" onClick={() => {
             window.location.reload(); // Recarga la página
           }}>
             Limpiar
@@ -150,12 +161,12 @@ export default function CreateCoursePage() {
 }
 
 // Componente reutilizable para secciones dinámicas
-function DynamicSection({ title, list, setList, fields }) {
+const DynamicSection: React.FC<DynamicSectionProps> = ({ title, list, setList, fields }) => {
   const [item, setItem] = useState(() =>
     fields.reduce((acc, field) => ({ ...acc, [field.key]: '' }), {})
   );
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setItem({ ...item, [e.target.name]: e.target.value });
   };
 
@@ -186,15 +197,9 @@ function DynamicSection({ title, list, setList, fields }) {
           Agregar
         </button>
       </div>
-      <div
-        className="space-y-2 max-h-40 overflow-y-auto border p-3 rounded-md"
-        style={{ maxHeight: '200px' }}
-      >
+      <div className="space-y-2 max-h-40 overflow-y-auto border p-3 rounded-md" style={{ maxHeight: '200px' }}>
         {list.map((el, idx) => (
-          <div
-            key={idx}
-            className="flex justify-between items-center bg-gray-100 p-3 rounded-md shadow-sm"
-          >
+          <div key={idx} className="flex justify-between items-center bg-gray-100 p-3 rounded-md shadow-sm">
             <div className="flex-1">
               {fields.map((field) => (
                 <span key={field.key} className="mr-4">
@@ -214,4 +219,6 @@ function DynamicSection({ title, list, setList, fields }) {
       </div>
     </div>
   );
-}
+};
+
+export default CreateCoursePage;
