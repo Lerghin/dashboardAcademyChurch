@@ -1,15 +1,22 @@
 'use client'
-
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { API_URL } from "@/app/lib/config";
 
-export default function EventDetail() {
-  const { id } = useParams(); // Removido <string>
+// Define la estructura de un evento
+interface Event {
+  nameEvents: string;
+  fecha_inicio: string;
+  description: string;
+}
 
-  const [event, setEvent] = useState(null);
+export default function EventDetail() {
+  const { id } = useParams();
+
+  // Tipado explícito para event
+  const [event, setEvent] = useState<Event | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     nameEvents: "",
     fecha_inicio: "",
@@ -23,14 +30,14 @@ export default function EventDetail() {
       try {
         const response = await fetch(`${API_URL}events/get/${id}`, { cache: "no-store" });
         if (!response.ok) throw new Error("Error en la solicitud");
-        const result = await response.json();
+        const result: Event = await response.json();
         setFormData(result);
         setEvent(result);
       } catch (err) {
         if (err instanceof Error) {
-          alert(`Error: ${err.message}`);
+          setError(err.message);
         } else {
-          alert("An unknown error occurred");
+          setError("Error desconocido");
         }
       }
     };
@@ -38,7 +45,7 @@ export default function EventDetail() {
   }, [id]);
 
   if (error) return <p>Error: {error}</p>;
-  if (!formData.nameEvents) return <p>Cargando...</p>;
+  if (!event) return <p>Cargando datos del evento...</p>;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -58,21 +65,19 @@ export default function EventDetail() {
       const updatedEvent = await response.json();
       setEvent(updatedEvent);
       setIsEditing(false);
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
     }
   };
-
-  if (!event) {
-    return <p className="text-center">Cargando datos del evento...</p>;
-  }
 
   return (
     <div className="min-h-screen bg-gray-100 py-10 px-6 md:px-16 lg:px-32">
       <div className="max-w-2xl mx-auto bg-white shadow-lg rounded-lg p-6">
         {!isEditing ? (
           <>
-            <h1 className="text-2xl font-semibold text-blue-700 mb-4">{event.nameEvents}</h1>
+            <h1 className="text-2xl font-semibold text-blue-700 mb-4">
+              {event.nameEvents}
+            </h1>
             <p className="text-sm text-gray-600 mb-2">
               <strong>Fecha de inicio:</strong> {event.fecha_inicio}
             </p>
