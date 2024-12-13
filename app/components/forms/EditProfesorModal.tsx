@@ -38,7 +38,11 @@ const EditProfesorModal: React.FC<EditProfesorModalProps> = ({ cursoId, onClose,
       onClose();
       window.location.reload();
     } catch (err) {
-      alert(`Error: ${err.message}`);
+      if (err instanceof Error) {
+        alert(`Error: ${err.message}`);
+      } else {
+        alert("An unknown error occurred");
+      }
     }
   };
   

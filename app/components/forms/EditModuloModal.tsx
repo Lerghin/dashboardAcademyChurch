@@ -43,8 +43,11 @@ const EditModuloModal: React.FC<EditModuloModalProps> = ({ id, onClose, onSave, 
       window.location.reload();
       
     } catch (err) {
-      console.error('Error al guardar módulo:', err.message);
-      alert('Error al guardar módulo: ' + err.message);
+      if (err instanceof Error) {
+        alert(`Error: ${err.message}`);
+      } else {
+        alert("An unknown error occurred");
+      }
     } finally {
       setIsLoading(false);
     }
