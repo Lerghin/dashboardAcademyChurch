@@ -1,6 +1,6 @@
-"use client";
+'use client'
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { API_URL } from "@/app/lib/config";
 
@@ -16,16 +16,15 @@ export default function EventDetail() {
     description: "",
   });
 
-  // Obtener los datos del evento por ID
   useEffect(() => {
-    if (!id) return; // Verifica que el ID esté disponible
+    if (!id) return;
 
     const fetchData = async () => {
       try {
         const response = await fetch(`${API_URL}events/get/${id}`, { cache: "no-store" });
         if (!response.ok) throw new Error("Error en la solicitud");
         const result = await response.json();
-        setFormData(result); // Pre-cargar datos en el formulario
+        setFormData(result);
         setEvent(result);
       } catch (err) {
         if (err instanceof Error) {
@@ -41,12 +40,12 @@ export default function EventDetail() {
   if (error) return <p>Error: {error}</p>;
   if (!formData.nameEvents) return <p>Cargando...</p>;
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = async (e) => {
+  const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       const response = await fetch(`${API_URL}events/${id}`, {
@@ -57,8 +56,8 @@ export default function EventDetail() {
       if (!response.ok) throw new Error("Error al guardar los cambios");
 
       const updatedEvent = await response.json();
-      setEvent(updatedEvent); // Actualiza los datos del evento
-      setIsEditing(false); // Sale del modo de edición
+      setEvent(updatedEvent);
+      setIsEditing(false);
     } catch (error) {
       console.error(error);
     }
@@ -73,9 +72,7 @@ export default function EventDetail() {
       <div className="max-w-2xl mx-auto bg-white shadow-lg rounded-lg p-6">
         {!isEditing ? (
           <>
-            <h1 className="text-2xl font-semibold text-blue-700 mb-4">
-              {event.nameEvents}
-            </h1>
+            <h1 className="text-2xl font-semibold text-blue-700 mb-4">{event.nameEvents}</h1>
             <p className="text-sm text-gray-600 mb-2">
               <strong>Fecha de inicio:</strong> {event.fecha_inicio}
             </p>
@@ -91,9 +88,7 @@ export default function EventDetail() {
           </>
         ) : (
           <form onSubmit={handleSave}>
-            <h1 className="text-2xl font-semibold text-blue-700 mb-4">
-              Editar Evento
-            </h1>
+            <h1 className="text-2xl font-semibold text-blue-700 mb-4">Editar Evento</h1>
             <input
               type="text"
               name="nameEvents"
@@ -121,10 +116,7 @@ export default function EventDetail() {
               required
             ></textarea>
             <div className="flex space-x-4">
-              <button
-                type="submit"
-                className="bg-green-500 text-white p-2 rounded-md"
-              >
+              <button type="submit" className="bg-green-500 text-white p-2 rounded-md">
                 Guardar
               </button>
               <button
