@@ -1,25 +1,19 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-
-import { useParams } from 'next/navigation';
-import { API_URL } from '@/app/lib/config';
-import { Link } from 'react-router-dom';
-
-
-
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { API_URL } from "@/app/lib/config";
 
 export default function EventDetail() {
-    const { id } = useParams<string>();
-  
+  const { id } = useParams(); // Removido <string>
 
   const [event, setEvent] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState(null);
   const [formData, setFormData] = useState({
-    nameEvents: '',
-    fecha_inicio: '',
-    description: '',
+    nameEvents: "",
+    fecha_inicio: "",
+    description: "",
   });
 
   // Obtener los datos del evento por ID
@@ -29,22 +23,24 @@ export default function EventDetail() {
     const fetchData = async () => {
       try {
         const response = await fetch(`${API_URL}events/get/${id}`, { cache: "no-store" });
-        if (!response.ok) throw new Error('Error en la solicitud');
+        if (!response.ok) throw new Error("Error en la solicitud");
         const result = await response.json();
         setFormData(result); // Pre-cargar datos en el formulario
-        setEvent(result)
-        
+        setEvent(result);
       } catch (err) {
-        setError(err.message);
+        if (err instanceof Error) {
+          alert(`Error: ${err.message}`);
+        } else {
+          alert("An unknown error occurred");
+        }
       }
     };
     fetchData();
-  }, [id]); // Asegúrate de que el hook useEffect se ejecute cuando cambie el ID
+  }, [id]);
 
   if (error) return <p>Error: {error}</p>;
   if (!formData.nameEvents) return <p>Cargando...</p>;
 
-  // Manejo del formulario de edición
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -54,11 +50,11 @@ export default function EventDetail() {
     e.preventDefault();
     try {
       const response = await fetch(`${API_URL}events/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-      if (!response.ok) throw new Error('Error al guardar los cambios');
+      if (!response.ok) throw new Error("Error al guardar los cambios");
 
       const updatedEvent = await response.json();
       setEvent(updatedEvent); // Actualiza los datos del evento
@@ -92,7 +88,6 @@ export default function EventDetail() {
             >
               Editar Evento
             </button>
-          
           </>
         ) : (
           <form onSubmit={handleSave}>
