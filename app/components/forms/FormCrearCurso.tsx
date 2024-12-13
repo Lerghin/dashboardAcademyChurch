@@ -1,18 +1,34 @@
 'use client';
-
 import { useState } from 'react';
 import { API_URL } from '@/app/lib/config';
+
+interface Miembro {
+  cedula: string;
+  nombre: string;
+  apellido: string;
+}
+
+interface Profesor {
+  cedula: string;
+  name: string;
+  lastName: string;
+}
+
+interface Modulo {
+  numModulo: string;
+  descripcion: string;
+}
 
 interface DynamicSectionProps {
   title: string;
   list: any[];
   setList: React.Dispatch<React.SetStateAction<any[]>>;
-  fields: { key: string, label: string }[];
+  fields: { key: string; label: string }[];
 }
 
 interface StudentFormProps {
-  type: "create" | "update";  // O cualquier otro tipo que estés utilizando
-  data?: any;  // Ajusta esto según los datos que estás pasando
+  type: 'create' | 'update';
+  data?: any;
   table: string;
 }
 
@@ -24,9 +40,10 @@ const CreateCoursePage: React.FC<StudentFormProps> = ({ type, data }) => {
     fecha_fin: '',
   });
 
-  const [miembros, setMiembros] = useState([]);
-  const [profesores, setProfesores] = useState([]);
-  const [modulos, setModulos] = useState([]);
+  // Tipado de los estados de los miembros, profesores y módulos
+  const [miembros, setMiembros] = useState<Miembro[]>([]);
+  const [profesores, setProfesores] = useState<Profesor[]>([]);
+  const [modulos, setModulos] = useState<Modulo[]>([]);
 
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
