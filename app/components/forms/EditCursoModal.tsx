@@ -41,7 +41,11 @@ export default function EditCursoModal({ curso, onClose, onSave }: EditCursoModa
       alert("Cambio Realizado con exito")
       window.location.reload();
     } catch (err) {
-      console.error(err.message);
+      if (err instanceof Error) {
+        alert(`Error: ${err.message}`);
+      } else {
+        alert("An unknown error occurred");
+      }
     }
   };
 
