@@ -49,12 +49,13 @@ const TeacherForm = ({ type, data }: TeacherFormProps) => {
   };
 
   const handleRemoveCourse = (index: number) => {
-    const newCourses = formData.cursos.filter((_, i) => i !== index);
+    const newCourses = formData.cursos.filter((_: string, i: number) => i !== index);
     setFormData((prevState) => ({
       ...prevState,
       cursos: newCourses,
     }));
   };
+  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
