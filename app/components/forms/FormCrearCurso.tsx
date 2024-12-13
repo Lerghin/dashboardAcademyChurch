@@ -13,7 +13,7 @@ interface DynamicSectionProps {
 interface StudentFormProps {
   type: "create" | "update";  // O cualquier otro tipo que estés utilizando
   data?: any;  // Ajusta esto según los datos que estás pasando
-  table:string
+  table: string;
 }
 
 const CreateCoursePage: React.FC<StudentFormProps> = ({ type, data }) => {
@@ -31,7 +31,7 @@ const CreateCoursePage: React.FC<StudentFormProps> = ({ type, data }) => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  const handleCursoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCursoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setCurso({ ...curso, [e.target.name]: e.target.value });
   };
 
@@ -159,7 +159,7 @@ const CreateCoursePage: React.FC<StudentFormProps> = ({ type, data }) => {
       </form>
     </div>
   );
-}
+};
 
 // Componente reutilizable para secciones dinámicas
 const DynamicSection: React.FC<DynamicSectionProps> = ({ title, list, setList, fields }) => {
