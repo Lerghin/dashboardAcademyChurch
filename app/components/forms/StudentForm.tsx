@@ -42,14 +42,16 @@ const StudentForm: React.FC<StudentFormProps> = ({ type, data }) => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prevState) => ({
       ...prevState,
       [name]: value,
     }));
   };
-
+  
   const handleAddCourse = () => {
     if (formData.nuevoCurso && formData.nuevoNivel) {
       const newCourse = {
