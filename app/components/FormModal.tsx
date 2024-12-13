@@ -38,7 +38,7 @@ const forms: { [key in TableType]: (type: "create" | "update", data?: any) => JS
   group: (type, data) => <GroupsForm type={type} data={data} />,
   curso: (type, data) => <CursoForm type={type} data={data} table="curso" />,
   events: (type, data) => <CreateEventModal type={type} data={data} table="eventos"  />,
-  pago: (type, data) => <CreatePagoModal type={type} data={data}  table="pago"  />
+  pago: (type, data) => <CreatePagoModal type={type} data={data} table="pago"  />
 };
 
 // Componente modal de formularios

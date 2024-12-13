@@ -3,11 +3,11 @@ import { API_URL } from "@/app/lib/config";
 // Interfaz de las props
 interface FormProps {
   table: string;
-  type: string;  // Aquí se define si es para crear o editar
-  data?: Pago;  // En caso de ser edición, se pasan los datos del pago
-  onClose: () => void;  // Asegúrate de definir onClose
-  onSave: (savedPago: string) => void;  // Define el tipo de onSave
+  type: "create" | "update";  // Specify valid types here
+  data?: any;
+  
 }
+
 
 interface Pago {
   miembro: Miembro;
@@ -22,7 +22,7 @@ interface Miembro {
   cedula: string;
 }
 
-const CreatePagoModal: React.FC<FormProps> = ({ table, onClose, onSave, type, data }) => {
+const CreatePagoModal: React.FC<FormProps> = ({ table, type, data }) => {
   // Definir el estado de los campos del formulario
   const [cedula, setCedula] = useState<string>(data?.miembro?.cedula || "");
   const [fecha_pago, setFechaPago] = useState<string>(data?.fecha_pago || "");
@@ -54,8 +54,7 @@ const CreatePagoModal: React.FC<FormProps> = ({ table, onClose, onSave, type, da
       }
 
       const savedPago = await response.text();
-      onSave(savedPago);  // Llamar al callback onSave con el pago guardado
-      onClose();  // Cerrar el modal
+       // Cerrar el modal
     } catch (err) {
       if (err instanceof Error) {
         alert(`Error: ${err.message}`);
@@ -67,7 +66,7 @@ const CreatePagoModal: React.FC<FormProps> = ({ table, onClose, onSave, type, da
 
   useEffect(() => {
     // Si el tipo es editar, establecer los datos del pago en los estados
-    if (type === "edit" && data) {
+    if (type === "update" && data) {
       setCedula(data.miembro.cedula);
       setFechaPago(data.fecha_pago);
       setMetodoPago(data.metodoPago);
@@ -143,7 +142,7 @@ const CreatePagoModal: React.FC<FormProps> = ({ table, onClose, onSave, type, da
 
         <div className="flex justify-between">
           <button
-            onClick={onClose}  // Usar onClose para cerrar el modal
+           // Usar onClose para cerrar el modal
             className="px-4 py-2 bg-gray-300 rounded-md text-gray-700 hover:bg-gray-400"
           >
             Cancelar
