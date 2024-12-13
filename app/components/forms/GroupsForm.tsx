@@ -54,7 +54,7 @@ const CreateGroupsPage: React.FC<CreateGroupsPageProps> = ({ type, data }) => {
     }
 
     try {
-      const response = await fetch(`${API_URL}grupo/${type === 'edit' ? 'update' : 'create'}`, {
+      const response = await fetch(`${API_URL}grupo/${type === 'update' ? 'update' : 'create'}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ numeroGrupo, miembroList }),
@@ -64,11 +64,11 @@ const CreateGroupsPage: React.FC<CreateGroupsPageProps> = ({ type, data }) => {
 
       setNumeroGrupo('');
       setMiembroList([]);
-      setSuccess('Grupo ' + (type === 'edit' ? 'actualizado' : 'creado') + ' con éxito');
+      setSuccess('Grupo ' + (type === 'update' ? 'actualizado' : 'creado') + ' con éxito');
       setError(null);
     } catch (err) {
       console.error(err);
-      setError('Hubo un problema al ' + (type === 'edit' ? 'actualizar' : 'crear') + ' el grupo');
+      setError('Hubo un problema al ' + (type === 'update' ? 'actualizar' : 'crear') + ' el grupo');
       setSuccess(null);
     }
   };
@@ -78,7 +78,7 @@ const CreateGroupsPage: React.FC<CreateGroupsPageProps> = ({ type, data }) => {
       <div className="max-w-lg mx-auto bg-white shadow-lg rounded-lg overflow-hidden w-full">
         <div className="p-6 md:p-8">
           <h2 className="text-2xl font-semibold mb-4 text-blue-700">
-            {type === 'edit' ? 'Editar Grupo' : 'Crear Nuevo Grupo'}
+            {type === 'update' ? 'Editar Grupo' : 'Crear Nuevo Grupo'}
           </h2>
 
           {success && <div className="bg-green-200 p-4 mb-4 text-green-800 rounded-md">{success}</div>}
@@ -147,7 +147,7 @@ const CreateGroupsPage: React.FC<CreateGroupsPageProps> = ({ type, data }) => {
                 type="submit"
                 className="px-6 py-2 bg-blue-500 text-white rounded-md"
               >
-                {type === 'edit' ? 'Actualizar Grupo' : 'Crear Grupo'}
+                {type === 'update' ? 'Actualizar Grupo' : 'Crear Grupo'}
               </button>
             </div>
           </form>
