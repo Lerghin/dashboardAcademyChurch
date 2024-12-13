@@ -18,7 +18,7 @@ const CreateGroupsPage: React.FC<CreateGroupsPageProps> = ({ type, data }) => {
 
   // Si estamos editando, inicializamos los valores con los datos recibidos
   useEffect(() => {
-    if (type === 'edit' && data) {
+    if (type === 'update' && data) {
       setNumeroGrupo(data.numeroGrupo);
       setMiembroList(data.miembros);
     }
