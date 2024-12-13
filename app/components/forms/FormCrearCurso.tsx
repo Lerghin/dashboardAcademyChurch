@@ -177,12 +177,13 @@ const CreateCoursePage: React.FC<StudentFormProps> = ({ type, data }) => {
     </div>
   );
 };
-
-// Componente reutilizable para secciones dinámicas
 const DynamicSection: React.FC<DynamicSectionProps> = ({ title, list, setList, fields }) => {
-  const [item, setItem] = useState(() =>
-    fields.reduce((acc, field) => ({ ...acc, [field.key]: '' }), {})
-  );
+  // Define the type for item based on the fields
+  type ItemType = Record<string, string>;
+
+  const initialItemState: ItemType = fields.reduce((acc, field) => ({ ...acc, [field.key]: '' }), {});
+
+  const [item, setItem] = useState<ItemType>(initialItemState);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setItem({ ...item, [e.target.name]: e.target.value });
@@ -201,7 +202,7 @@ const DynamicSection: React.FC<DynamicSectionProps> = ({ title, list, setList, f
           <input
             key={field.key}
             name={field.key}
-            value={item[field.key]}
+            value={item[field.key]} // Now TypeScript knows item is of type ItemType
             onChange={handleChange}
             placeholder={field.label}
             className="p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
@@ -238,5 +239,7 @@ const DynamicSection: React.FC<DynamicSectionProps> = ({ title, list, setList, f
     </div>
   );
 };
+
+
 
 export default CreateCoursePage;
