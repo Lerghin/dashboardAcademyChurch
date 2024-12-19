@@ -6,6 +6,8 @@ import Pagination from "@/app/components/Pagination";
 import { API_URL } from "@/app/lib/config";
 import { useAuthStore } from "@/app/store/authStore";
 import FormModal from "@/app/components/FormModal";
+import Image from "next/image";
+import Link from "next/link"
 
 type Teacher = {
   idProfessor: string;
@@ -83,6 +85,31 @@ const TeacherListPage = () => {
     setCurrentPage(1); // Volver a la primera página cuando se cambia el término de búsqueda
   };
 
+
+  // Aquí está la parte donde manejas el tipo de acción delete
+const handleDelete = (idProfessor: string) => {
+  const confirmed = window.confirm("¿Estás seguro de que deseas eliminar este profesor?");
+  if (confirmed) {
+    // Aquí va tu lógica para eliminar el profesor
+   
+   alert("Profesor eliminado");
+  // reload the current page
+    window.location.reload();
+
+    // Llama a la API para eliminar o elimina de los datos locales
+    fetch(`${API_URL}profe/delete/${idProfessor}`, { method: "DELETE" })
+      .then(response => response.json())
+    .then(data => {
+       if (data.success) {
+         alert("Profesor eliminado exitosamente");
+       }
+      })
+      .catch(error => console.error("Error al eliminar el profesor", error));
+  } else {
+    alert("Eliminación cancelada");
+  }
+};
+
   const renderRow = (item: Teacher) => (
     <tr
       key={item.idProfessor}
@@ -102,7 +129,17 @@ const TeacherListPage = () => {
       <td className="hidden md:table-cell px-4">{item.address}</td>
       <td>
         <div className="flex items-center gap-2">
-          <button className="text-blue-500 hover:text-blue-700">Editar</button>
+        <Link href={`/dashboard/list/teachers/${item.idProfessor}`}>
+            <button className="w-7 h-7 flex items-center justify-center rounded-full bg-lamaSky">
+              <Image src="/view.png" alt="" width={16} height={16} />
+            </button>
+          </Link>
+          <button
+          onClick={() => handleDelete(item.idProfessor)}
+          className="w-7 h-7 flex items-center justify-center rounded-full bg-red-500"
+        >
+          <Image src="/delete.png" alt="Eliminar" width={16} height={16} />
+        </button>
         </div>
       </td>
     </tr>
@@ -125,7 +162,7 @@ const TeacherListPage = () => {
         </div>
         <div className="flex items-center gap-4 self-end">
             
-              <FormModal table="student" type="create" />
+              <FormModal table="teacher" type="create" />
           
           </div>
       </div>

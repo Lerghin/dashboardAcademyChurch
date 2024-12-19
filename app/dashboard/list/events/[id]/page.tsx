@@ -1,76 +1,74 @@
-'use client';
+'use client'
+import React, { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { API_URL } from "@/app/lib/config";
 
-import { useEffect, useState } from 'react';
-
-import { useParams } from 'next/navigation';
-import { API_URL } from '@/app/lib/config';
-import { Link } from 'react-router-dom';
-
-
-
+// Define la estructura de un evento
+interface Event {
+  nameEvents: string;
+  fecha_inicio: string;
+  description: string;
+}
 
 export default function EventDetail() {
-    const { id } = useParams<string>();
-  
+  const { id } = useParams();
 
-  const [event, setEvent] = useState(null);
+  // Tipado explícito para event
+  const [event, setEvent] = useState<Event | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    nameEvents: '',
-    fecha_inicio: '',
-    description: '',
+    nameEvents: "",
+    fecha_inicio: "",
+    description: "",
   });
 
-  // Obtener los datos del evento por ID
   useEffect(() => {
-    if (!id) return; // Verifica que el ID esté disponible
+    if (!id) return;
 
     const fetchData = async () => {
       try {
         const response = await fetch(`${API_URL}events/get/${id}`, { cache: "no-store" });
-        if (!response.ok) throw new Error('Error en la solicitud');
-        const result = await response.json();
-        setFormData(result); // Pre-cargar datos en el formulario
-        setEvent(result)
-        
+        if (!response.ok) throw new Error("Error en la solicitud");
+        const result: Event = await response.json();
+        setFormData(result);
+        setEvent(result);
       } catch (err) {
-        setError(err.message);
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("Error desconocido");
+        }
       }
     };
     fetchData();
-  }, [id]); // Asegúrate de que el hook useEffect se ejecute cuando cambie el ID
+  }, [id]);
 
   if (error) return <p>Error: {error}</p>;
-  if (!formData.nameEvents) return <p>Cargando...</p>;
+  if (!event) return <p>Cargando datos del evento...</p>;
 
-  // Manejo del formulario de edición
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = async (e) => {
+  const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       const response = await fetch(`${API_URL}events/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-      if (!response.ok) throw new Error('Error al guardar los cambios');
+      if (!response.ok) throw new Error("Error al guardar los cambios");
 
       const updatedEvent = await response.json();
-      setEvent(updatedEvent); // Actualiza los datos del evento
-      setIsEditing(false); // Sale del modo de edición
-    } catch (error) {
-      console.error(error);
+      setEvent(updatedEvent);
+      setIsEditing(false);
+    } catch (err) {
+      console.error(err);
     }
   };
-
-  if (!event) {
-    return <p className="text-center">Cargando datos del evento...</p>;
-  }
 
   return (
     <div className="min-h-screen bg-gray-100 py-10 px-6 md:px-16 lg:px-32">
@@ -92,13 +90,10 @@ export default function EventDetail() {
             >
               Editar Evento
             </button>
-          
           </>
         ) : (
           <form onSubmit={handleSave}>
-            <h1 className="text-2xl font-semibold text-blue-700 mb-4">
-              Editar Evento
-            </h1>
+            <h1 className="text-2xl font-semibold text-blue-700 mb-4">Editar Evento</h1>
             <input
               type="text"
               name="nameEvents"
@@ -126,10 +121,7 @@ export default function EventDetail() {
               required
             ></textarea>
             <div className="flex space-x-4">
-              <button
-                type="submit"
-                className="bg-green-500 text-white p-2 rounded-md"
-              >
+              <button type="submit" className="bg-green-500 text-white p-2 rounded-md">
                 Guardar
               </button>
               <button

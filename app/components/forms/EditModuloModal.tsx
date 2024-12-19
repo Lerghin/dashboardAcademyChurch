@@ -21,7 +21,7 @@ const EditModuloModal: React.FC<EditModuloModalProps> = ({ id, onClose, onSave, 
   const handleSaveModulo = async () => {
     setIsLoading(true);
     const newModulo = { numModulo, descripcion };
-
+  
     try {
       const response = await fetch(`${API_URL}modulo/create/${id}`, {
         method: 'POST',
@@ -30,26 +30,29 @@ const EditModuloModal: React.FC<EditModuloModalProps> = ({ id, onClose, onSave, 
         },
         body: JSON.stringify(newModulo),
       });
-
-      const data = await response.text();
-
+  
+      // Parse the response as JSON
+      const data = await response.json();
+  
       if (!response.ok) {
         throw new Error(data.error || 'Error al guardar el módulo');
       }
-
+  
       alert(data.message || 'Módulo guardado con éxito');
-
       onClose(); // Cerrar el modal
       window.location.reload();
       
     } catch (err) {
-      console.error('Error al guardar módulo:', err.message);
-      alert('Error al guardar módulo: ' + err.message);
+      if (err instanceof Error) {
+        alert(`Error: ${err.message}`);
+      } else {
+        alert("An unknown error occurred");
+      }
     } finally {
       setIsLoading(false);
     }
   };
-
+  
   return (
     <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-lg w-96">

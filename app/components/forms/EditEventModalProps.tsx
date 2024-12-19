@@ -47,7 +47,11 @@ const EditNotaModal: React.FC<EditNotaModalProps> = ({ onClose, onSave, notaMiem
       onSave(savedNota);
       onClose();
     } catch (err) {
-      alert(`Error: ${err.message}`);
+      if (err instanceof Error) {
+        alert(`Error: ${err.message}`);
+      } else {
+        alert("An unknown error occurred");
+      }
     }
   };
 

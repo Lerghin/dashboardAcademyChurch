@@ -47,7 +47,11 @@ const EditEventModal: React.FC<EditEventModalProps> = ({ onClose, onSave, event 
       onSave(savedEvent);
       onClose();
     } catch (err) {
-      alert(`Error: ${err.message}`);
+      if (err instanceof Error) {
+        alert(`Error: ${err.message}`);
+      } else {
+        alert("An unknown error occurred");
+      }
     }
   };
 

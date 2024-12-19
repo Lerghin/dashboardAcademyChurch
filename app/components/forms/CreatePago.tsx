@@ -1,9 +1,13 @@
+import { useState, useEffect } from "react";
 import { API_URL } from "@/app/lib/config";
-import { useState } from "react";
-
-interface Miembro {
-  cedula: string;
+// Interfaz de las props
+interface FormProps {
+  table: string;
+  type: "create" | "update";  // Specify valid types here
+  data?: any;
+  
 }
+
 
 interface Pago {
   miembro: Miembro;
@@ -11,23 +15,23 @@ interface Pago {
   metodoPago: string;
   referencia: string;
   observacion: string;
-  monto: number; // Agregado monto
+  monto: number;
 }
 
-interface FormModalProps {
-  table: string;
-  onClose: () => void;
-  onSave: (pago: Pago) => void;
+interface Miembro {
+  cedula: string;
 }
 
-const CreatePagoModal: React.FC<FormModalProps> = ({ table, onClose, onSave }) => {
-  const [cedula, setCedula] = useState<string>("");
-  const [fecha_pago, setFechaPago] = useState<string>("");
-  const [metodoPago, setMetodoPago] = useState<string>("");
-  const [referencia, setReferencia] = useState<string>("");
-  const [observacion, setObservacion] = useState<string>("");
-  const [monto, setMonto] = useState<number>(0); // Nuevo estado para monto
+const CreatePagoModal: React.FC<FormProps> = ({ table, type, data }) => {
+  // Definir el estado de los campos del formulario
+  const [cedula, setCedula] = useState<string>(data?.miembro?.cedula || "");
+  const [fecha_pago, setFechaPago] = useState<string>(data?.fecha_pago || "");
+  const [metodoPago, setMetodoPago] = useState<string>(data?.metodoPago || "");
+  const [referencia, setReferencia] = useState<string>(data?.referencia || "");
+  const [observacion, setObservacion] = useState<string>(data?.observacion || "");
+  const [monto, setMonto] = useState<number>(data?.monto || 0);
 
+  // Manejar el envío del formulario
   const handleSubmit = async () => {
     const pagoPayload: Pago = {
       miembro: { cedula },
@@ -35,13 +39,12 @@ const CreatePagoModal: React.FC<FormModalProps> = ({ table, onClose, onSave }) =
       metodoPago,
       referencia,
       observacion,
-      monto, // Incluyendo el monto
+      monto,
     };
 
     try {
-      console.log(pagoPayload); // Verifica los datos que se enviarán
-      const response = await fetch(`${API_URL}pago/create`, {
-        method: "POST",
+      const response = await fetch(`${API_URL}pago/${type}`, {  // Usar el tipo para determinar la URL (create o edit)
+        method: type === "create" ? "POST" : "PUT",  // POST para crear, PUT para editar
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(pagoPayload),
       });
@@ -51,16 +54,32 @@ const CreatePagoModal: React.FC<FormModalProps> = ({ table, onClose, onSave }) =
       }
 
       const savedPago = await response.text();
-      window.location.reload(); // Recarga la página para reflejar los cambios
+       // Cerrar el modal
     } catch (err) {
-      alert(`Error: ${err.message}`);
+      if (err instanceof Error) {
+        alert(`Error: ${err.message}`);
+      } else {
+        alert("An unknown error occurred");
+      }
     }
   };
+
+  useEffect(() => {
+    // Si el tipo es editar, establecer los datos del pago en los estados
+    if (type === "update" && data) {
+      setCedula(data.miembro.cedula);
+      setFechaPago(data.fecha_pago);
+      setMetodoPago(data.metodoPago);
+      setReferencia(data.referencia);
+      setObservacion(data.observacion);
+      setMonto(data.monto);
+    }
+  }, [type, data]);
 
   return (
     <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-lg w-96">
-        <h2 className="text-xl font-semibold mb-4">Crear Pago</h2>
+        <h2 className="text-xl font-semibold mb-4">{type === "create" ? "Crear Pago" : "Editar Pago"}</h2>
 
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700">Cédula del Miembro</label>
@@ -122,11 +141,8 @@ const CreatePagoModal: React.FC<FormModalProps> = ({ table, onClose, onSave }) =
         </div>
 
         <div className="flex justify-between">
-        <button
-            onClick={() => {
-            
-              window.location.reload(); // Recarga la página
-            }}
+          <button
+           // Usar onClose para cerrar el modal
             className="px-4 py-2 bg-gray-300 rounded-md text-gray-700 hover:bg-gray-400"
           >
             Cancelar
@@ -135,7 +151,7 @@ const CreatePagoModal: React.FC<FormModalProps> = ({ table, onClose, onSave }) =
             onClick={handleSubmit}
             className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
           >
-            Crear
+            {type === "create" ? "Crear" : "Guardar"}
           </button>
         </div>
       </div>
