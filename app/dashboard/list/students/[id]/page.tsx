@@ -1,14 +1,33 @@
-'use client'
+'use client';
+
 import { API_URL } from '@/app/lib/config';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+interface FormData {
+  cedula: string;
+  nombre: string;
+  apellido: string;
+  fecha_nacimiento: string;
+  direccion: string;
+  ocupacion: string;
+  telefono: string;
+  sexo: string;
+  status: string;
+  fecha_ingreso: string;
+  cursosRealizados: {
+    [key: string]: string;
+  };
+  nuevoCurso: string;
+  nuevoNivel: string;
+}
+
 export default function SingleStudentPage() {
   const { id } = useParams();
-  const [data, setData] = useState(null);
+  const [data, setData] = useState<FormData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     cedula: '',
     nombre: '',
     apellido: '',
@@ -29,7 +48,7 @@ export default function SingleStudentPage() {
       try {
         const response = await fetch(`${API_URL}miembro/get/${id}`, { cache: "no-store" });
         if (!response.ok) throw new Error('Error en la solicitud');
-        const result = await response.json();
+        const result: FormData = await response.json();
         setData(result);
         setFormData(prevState => ({
           ...prevState,
@@ -51,7 +70,7 @@ export default function SingleStudentPage() {
 
   const handleModalToggle = () => setIsModalOpen(!isModalOpen);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prevState) => ({
       ...prevState,
@@ -92,11 +111,11 @@ export default function SingleStudentPage() {
         body: JSON.stringify(formData),
       });
       if (!response.ok) throw new Error('Error al actualizar los datos');
-      const updatedData = await response.json();
+      const updatedData: FormData = await response.json();
       setData(updatedData); // Actualizar la información local
       setIsModalOpen(false); // Cerrar el modal
     } catch (err) {
-      setError(err.message);
+      setError(err instanceof Error ? err.message : String(err));
     }
   };
 
