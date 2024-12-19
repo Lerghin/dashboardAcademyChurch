@@ -81,11 +81,20 @@ export default function CursoPage() {
     );
   }
 
-  // Función de guardado
-  const handleSave = (updatedCurso: Curso) => {
-    setCurso(updatedCurso);
-  };
 
+
+  const handleSave = (modulo: Modulo) => {
+    setCurso((prevCurso) => {
+      if (prevCurso) {
+        return {
+          ...prevCurso,
+          moduloList: [...prevCurso.moduloList, modulo],
+        };
+      }
+      return prevCurso;
+    });
+  };
+  
   // Eliminar profesor
   const handleDeleteProfesor = async (cedula: string) => {
     if (!confirm("¿Seguro que deseas eliminar este profesor?")) return;
@@ -223,143 +232,169 @@ export default function CursoPage() {
         </div>
 
         {isEditModuloModalOpen && (
-          <EditModuloModal
-            cursoId={selectedCursoId} // Pasar el idCurso seleccionado al modal
-            onClose={() => setEditModuloModalOpen(false)}
-            onSave={(modulo: Modulo) => {
-              // Aquí puedes actualizar la lista de módulos con el nuevo módulo
-              setCurso((prevCurso) => {
-                if (prevCurso) {
-                  return {
-                    ...prevCurso,
-                    moduloList: [...prevCurso.moduloList, modulo],
-                  };
-                }
-                return prevCurso;
-              });
-            }}
-          />
-        )}
-        {/* Lista de profesores */}
-        <div className="p-6 border-t border-gray-200">
-          <h3 className="text-xl font-semibold mb-4">Profesores</h3>
-          {curso.professorDTOS.length > 0 ? (
-            <ul className="list-disc pl-5 space-y-2 text-gray-700">
-              {curso.professorDTOS.map((profesor, index) => (
-                <li key={index}>
-                  <strong>
-                    {profesor.name} {profesor.lastName} ({profesor.cedula})
-                  </strong>
-                  <button
-                    onClick={() => handleDeleteProfesor(profesor.cedula)}
-                    className="text-red-500 ml-4"
-                  >
-                    Eliminar
-                  </button>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p>No hay profesores asignados.</p>
-          )}
-          <button
-            onClick={() => setEditProfesorModalOpen(true)}
-            className="text-white bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded-md mt-4"
-          >
-            Agregar Profesor
-          </button>
-        </div>
-        {/* Lista de miembros */}
-        <div className="p-6 border-t border-gray-200">
-          <h3 className="text-xl font-semibold mb-4">Miembros/Participantes</h3>
-          {curso.miembroDTOList.length > 0 ? (
-            <ul className="list-disc pl-5 space-y-2 text-gray-700">
-              {curso.miembroDTOList.map((miembro, index) => (
-                <li key={index}>
-                  <strong>
-                    {miembro.nombre} {miembro.apellido} ({miembro.cedula})
-                  </strong>
-                  <button
-                    onClick={() => handleDeleteMiembro(miembro.cedula)}
-                    className="text-red-500 ml-4"
-                  >
-                    Eliminar
-                  </button>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p>No hay miembros asignados.</p>
-          )}
-          <button
-            onClick={() => setEditMiembroModalOpen(true)}
-            className="text-white bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded-md mt-4"
-          >
-            Agregar Miembro
-          </button>
-        </div>
-      </div>
+  <EditModuloModal
+    cursoId={selectedCursoId}
+    onClose={() => setEditModuloModalOpen(false)}
+    onSave={(modulo: Modulo) => {
+      setCurso((prevCurso) => {
+        if (prevCurso) {
+          return {
+            ...prevCurso,
+            moduloList: [...prevCurso.moduloList, modulo],
+          };
+        }
+        return prevCurso;
+      });
+    }}
+  />
+)}
 
-      {/* Modales */}
-      {isEditModalOpen && (
-        <EditCursoModal
-          curso={curso}
-          onClose={() => setEditModalOpen(false)}
-          onSave={handleSave}
-        />
-      )}
-      {isEditProfesorModalOpen && (
-        <EditProfesorModal
-          cursoId={curso.idCurso} // Enviar el cursoId como prop
-          onClose={() => setEditProfesorModalOpen(false)}
-          onSave={(profesor: Profesor) => {
-            // Actualizar profesores en el estado del curso si es necesario
-            setCurso((prevCurso) => {
-              if (prevCurso) {
-                return {
-                  ...prevCurso,
-                  professorDTOS: [...prevCurso.professorDTOS, profesor],
-                };
-              }
-              return prevCurso;
-            });
-          }}
-        />
-      )}
-      {isEditMiembroModalOpen && (
-        <EditMiembroModal
-          cursoId={curso.idCurso}
-          onClose={() => setEditMiembroModalOpen(false)}
-          onSave={(miembro: Miembro) => {
-            setCurso((prevCurso) => {
-              if (prevCurso) {
-                return {
-                  ...prevCurso,
-                  miembroDTOList: [...prevCurso.miembroDTOList, miembro],
-                };
-              }
-              return prevCurso;
-            });
-          }}
-        />
-      )}
-      {isEditModuloModalOpen && (
-        <EditModuloModal
-          cursoId={curso.idCurso}
-          onClose={() => setEditModuloModalOpen(false)}
-          onSave={(modulo: Modulo) => {
-            setCurso((prevCurso) => {
-              if (prevCurso) {
-                return {
-                  ...prevCurso,
-                  moduloList: [...prevCurso.moduloList, modulo],
-                };
-              }
-              return prevCurso;
-            });
-          }}
-        />
-      )}
-    </div>
-  );
-}
+{/* Lista de módulos */}
+<div className="p-6 border-t border-gray-200">
+  <h3 className="text-xl font-semibold mb-4">Módulos</h3>
+  {curso.moduloList.length > 0 ? (
+    <ul className="list-disc pl-5 space-y-2 text-gray-700">
+      {curso.moduloList.map((modulo, index) => (
+        <li key={index} className="flex justify-between items-center">
+          <span>
+            <strong>{modulo.numModulo}:</strong> {modulo.descripcion}
+          </span>
+          <button
+            onClick={() => handleDeleteModulo(modulo.idModulo, curso.idCurso)}
+            className="text-red-500 ml-4"
+          >
+            Eliminar
+          </button>
+        </li>
+      ))}
+    </ul>
+  ) : (
+    <p>No hay módulos asignados.</p>
+  )}
+  <button
+    onClick={() => {
+      if (typeof id === 'string') {
+        setSelectedCursoId(id);
+        setEditModuloModalOpen(true);
+      }
+    }}
+    className="text-white bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded-md mt-4"
+  >
+    Agregar Módulo
+  </button>
+</div>
+
+{/* Lista de profesores */}
+<div className="p-6 border-t border-gray-200">
+  <h3 className="text-xl font-semibold mb-4">Profesores</h3>
+  {curso.professorDTOS.length > 0 ? (
+    <ul className="list-disc pl-5 space-y-2 text-gray-700">
+      {curso.professorDTOS.map((profesor, index) => (
+        <li key={index} className="flex justify-between items-center">
+          <span>
+            {profesor.name} {profesor.lastName} (Cédula: {profesor.cedula})
+          </span>
+          <button
+            onClick={() => handleDeleteProfesor(profesor.cedula)}
+            className="text-red-500 ml-4"
+          >
+            Eliminar
+          </button>
+        </li>
+      ))}
+    </ul>
+  ) : (
+    <p>No hay profesores asignados.</p>
+  )}
+  <button
+    onClick={() => setEditProfesorModalOpen(true)}
+    className="text-white bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded-md mt-4"
+  >
+    Agregar Profesor
+  </button>
+</div>
+
+{/* Lista de miembros */}
+<div className="p-6 border-t border-gray-200">
+  <h3 className="text-xl font-semibold mb-4">Participantes</h3>
+  {curso.miembroDTOList.length > 0 ? (
+    <ul className="list-disc pl-5 space-y-2 text-gray-700">
+      {curso.miembroDTOList.map((miembro, index) => (
+        <li key={index} className="flex justify-between items-center">
+          <span>
+            {miembro.nombre} {miembro.apellido} (Cédula: {miembro.cedula})
+          </span>
+          <button
+            onClick={() => handleDeleteMiembro(miembro.cedula)}
+            className="text-red-500 ml-4"
+          >
+            Eliminar
+          </button>
+        </li>
+      ))}
+    </ul>
+  ) : (
+    <p>No hay participantes asignados.</p>
+  )}
+  <button
+    onClick={() => setEditMiembroModalOpen(true)}
+    className="text-white bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded-md mt-4"
+  >
+    Agregar Participante
+  </button>
+</div>
+
+{/* Modales de edición */}
+{isEditProfesorModalOpen && (
+  <EditProfesorModal
+    cursoId={selectedCursoId}
+    onClose={() => setEditProfesorModalOpen(false)}
+    onSave={(profesor: Profesor) => {
+      setCurso((prevCurso) => {
+        if (prevCurso) {
+          return {
+            ...prevCurso,
+            professorDTOS: [...prevCurso.professorDTOS, profesor],
+          };
+        }
+        return prevCurso;
+      });
+    }}
+  />
+)}
+
+{isEditMiembroModalOpen && (
+  <EditMiembroModal
+    cursoId={selectedCursoId}
+    onClose={() => setEditMiembroModalOpen(false)}
+    onSave={(miembro: Miembro) => {
+      setCurso((prevCurso) => {
+        if (prevCurso) {
+          return {
+            ...prevCurso,
+            miembroDTOList: [...prevCurso.miembroDTOList, miembro],
+          };
+        }
+        return prevCurso;
+      });
+    }}
+  />
+)}
+
+{isEditModuloModalOpen && (
+  <EditModuloModal
+    cursoId={selectedCursoId}
+    onClose={() => setEditModuloModalOpen(false)}
+    onSave={(modulo: Modulo) => {
+      setCurso((prevCurso) => {
+        if (prevCurso) {
+          return {
+            ...prevCurso,
+            moduloList: [...prevCurso.moduloList, modulo],
+          };
+        }
+        return prevCurso;
+      });
+    }}
+  />
+)}
