@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
@@ -55,7 +55,7 @@ export default function CursoPage() {
           cache: "no-store",
         });
         if (!response.ok) throw new Error("Error al cargar datos del curso");
-        const result = await response.json();
+        const result: Curso = await response.json();
 
         setCurso(result);
       } catch (err) {
@@ -210,9 +210,11 @@ export default function CursoPage() {
           )}
           <button
             onClick={() => {
-              setSelectedCursoId(id);
-              console.log(selectedCursoId); // Guardar el id del curso al hacer clic
-              setEditModuloModalOpen(true); // Abrir el modal de edición
+              if (typeof id === 'string') {
+                setSelectedCursoId(id);
+                console.log(selectedCursoId); // Guardar el id del curso al hacer clic
+                setEditModuloModalOpen(true); // Abrir el modal de edición
+              }
             }}
             className="text-white bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded-md mt-4"
           >
@@ -226,6 +228,15 @@ export default function CursoPage() {
             onClose={() => setEditModuloModalOpen(false)}
             onSave={(modulo: Modulo) => {
               // Aquí puedes actualizar la lista de módulos con el nuevo módulo
+              setCurso((prevCurso) => {
+                if (prevCurso) {
+                  return {
+                    ...prevCurso,
+                    moduloList: [...prevCurso.moduloList, modulo],
+                  };
+                }
+                return prevCurso;
+              });
             }}
           />
         )}
