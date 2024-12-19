@@ -4,9 +4,20 @@ import { API_URL } from '@/app/lib/config';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+interface Miembro {
+  idMiembro: string;
+  nombre: string;
+  apellido: string;
+}
+
+interface GrupoData {
+  numeroGrupo: string;
+  miembroList: Miembro[];
+}
+
 export default function GrupoPage() {
   const { id } = useParams();
-  const [data, setData] = useState(null);
+  const [data, setData] = useState<GrupoData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -111,7 +122,7 @@ export default function GrupoPage() {
     }
   };
 
-  const { miembroList } = data;
+  const { miembroList = [] } = data;
 
   return (
     <div className="min-h-screen bg-gray-100 py-10 px-6 md:px-16 lg:px-32">
@@ -155,7 +166,6 @@ export default function GrupoPage() {
           </ul>
         </div>
       </div>
-
       {isModalOpen && (
         <div className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 h-screen">
           <div className="bg-white p-8 rounded-lg w-full max-w-lg">
