@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 export default function GrupoPage() {
-  const { id } = useParams<string>();
+  const { id } = useParams();
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
