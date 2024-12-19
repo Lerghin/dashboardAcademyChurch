@@ -80,7 +80,11 @@ export default function CursoPage() {
     );
   }
 
-  const handleSave = (modulo: Modulo) => {
+  const handleSaveCurso = (updatedCurso: Curso) => {
+    setCurso(updatedCurso);
+  };
+
+  const handleSaveModulo = (modulo: Modulo) => {
     setCurso((prevCurso) => {
       if (prevCurso) {
         return {
@@ -289,7 +293,7 @@ export default function CursoPage() {
         <EditCursoModal
           curso={curso}
           onClose={() => setEditModalOpen(false)}
-          onSave={handleSave}
+          onSave={handleSaveCurso}
         />
       )}
       {isEditProfesorModalOpen && (
@@ -330,17 +334,7 @@ export default function CursoPage() {
         <EditModuloModal
           cursoId={selectedCursoId}
           onClose={() => setEditModuloModalOpen(false)}
-          onSave={(modulo: Modulo) => {
-            setCurso((prevCurso) => {
-              if (prevCurso) {
-                return {
-                  ...prevCurso,
-                  moduloList: [...prevCurso.moduloList, modulo],
-                };
-              }
-              return prevCurso;
-            });
-          }}
+          onSave={handleSaveModulo}
         />
       )}
     </div>
