@@ -56,7 +56,6 @@ export default function CursoPage() {
         });
         if (!response.ok) throw new Error("Error al cargar datos del curso");
         const result: Curso = await response.json();
-
         setCurso(result);
       } catch (err) {
         if (err instanceof Error) {
@@ -81,8 +80,6 @@ export default function CursoPage() {
     );
   }
 
-
-
   const handleSave = (modulo: Modulo) => {
     setCurso((prevCurso) => {
       if (prevCurso) {
@@ -94,8 +91,7 @@ export default function CursoPage() {
       return prevCurso;
     });
   };
-  
-  // Eliminar profesor
+
   const handleDeleteProfesor = async (cedula: string) => {
     if (!confirm("¿Seguro que deseas eliminar este profesor?")) return;
     try {
@@ -113,7 +109,6 @@ export default function CursoPage() {
     }
   };
 
-  // Eliminar miembro
   const handleDeleteMiembro = async (cedula: string) => {
     if (!confirm("¿Seguro que deseas eliminar este participante?")) return;
     try {
@@ -131,12 +126,10 @@ export default function CursoPage() {
     }
   };
 
-  // Eliminar módulo
   const handleDeleteModulo = async (idModulo: string, idCurso: string) => {
     if (!confirm("¿Seguro que deseas eliminar este modulo?")) return;
 
     try {
-      console.log("ID enviado al backend:", idModulo);
       const response = await fetch(
         `${API_URL}modulo/delete/${idModulo}/${idCurso}`,
         {
@@ -154,7 +147,6 @@ export default function CursoPage() {
 
       alert(data.message || "Módulo eliminado con éxito");
 
-      // Recargar la página después de eliminar el módulo
       window.location.reload();
     } catch (err) {
       if (err instanceof Error) {
@@ -196,17 +188,18 @@ export default function CursoPage() {
             </p>
           </div>
         </div>
+        {/* Lista de módulos */}
         <div className="p-6 border-t border-gray-200">
           <h3 className="text-xl font-semibold mb-4">Módulos</h3>
           {curso.moduloList.length > 0 ? (
             <ul className="list-disc pl-5 space-y-2 text-gray-700">
               {curso.moduloList.map((modulo, index) => (
-                <li key={index}>
-                  <strong>{modulo.numModulo}:</strong> {modulo.descripcion}
+                <li key={index} className="flex justify-between items-center">
+                  <span>
+                    <strong>{modulo.numModulo}:</strong> {modulo.descripcion}
+                  </span>
                   <button
-                    onClick={() =>
-                      handleDeleteModulo(modulo.idModulo, curso.idCurso)
-                    }
+                    onClick={() => handleDeleteModulo(modulo.idModulo, curso.idCurso)}
                     className="text-red-500 ml-4"
                   >
                     Eliminar
@@ -221,8 +214,7 @@ export default function CursoPage() {
             onClick={() => {
               if (typeof id === 'string') {
                 setSelectedCursoId(id);
-                console.log(selectedCursoId); // Guardar el id del curso al hacer clic
-                setEditModuloModalOpen(true); // Abrir el modal de edición
+                setEditModuloModalOpen(true);
               }
             }}
             className="text-white bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded-md mt-4"
@@ -231,170 +223,126 @@ export default function CursoPage() {
           </button>
         </div>
 
-        {isEditModuloModalOpen && (
-  <EditModuloModal
-    cursoId={selectedCursoId}
-    onClose={() => setEditModuloModalOpen(false)}
-    onSave={(modulo: Modulo) => {
-      setCurso((prevCurso) => {
-        if (prevCurso) {
-          return {
-            ...prevCurso,
-            moduloList: [...prevCurso.moduloList, modulo],
-          };
-        }
-        return prevCurso;
-      });
-    }}
-  />
-)}
-
-{/* Lista de módulos */}
-<div className="p-6 border-t border-gray-200">
-  <h3 className="text-xl font-semibold mb-4">Módulos</h3>
-  {curso.moduloList.length > 0 ? (
-    <ul className="list-disc pl-5 space-y-2 text-gray-700">
-      {curso.moduloList.map((modulo, index) => (
-        <li key={index} className="flex justify-between items-center">
-          <span>
-            <strong>{modulo.numModulo}:</strong> {modulo.descripcion}
-          </span>
+        {/* Lista de profesores */}
+        <div className="p-6 border-t border-gray-200">
+          <h3 className="text-xl font-semibold mb-4">Profesores</h3>
+          {curso.professorDTOS.length > 0 ? (
+            <ul className="list-disc pl-5 space-y-2 text-gray-700">
+              {curso.professorDTOS.map((profesor, index) => (
+                <li key={index} className="flex justify-between items-center">
+                  <span>
+                    {profesor.name} {profesor.lastName} (Cédula: {profesor.cedula})
+                  </span>
+                  <button
+                    onClick={() => handleDeleteProfesor(profesor.cedula)}
+                    className="text-red-500 ml-4"
+                  >
+                    Eliminar
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No hay profesores asignados.</p>
+          )}
           <button
-            onClick={() => handleDeleteModulo(modulo.idModulo, curso.idCurso)}
-            className="text-red-500 ml-4"
+            onClick={() => setEditProfesorModalOpen(true)}
+            className="text-white bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded-md mt-4"
           >
-            Eliminar
+            Agregar Profesor
           </button>
-        </li>
-      ))}
-    </ul>
-  ) : (
-    <p>No hay módulos asignados.</p>
-  )}
-  <button
-    onClick={() => {
-      if (typeof id === 'string') {
-        setSelectedCursoId(id);
-        setEditModuloModalOpen(true);
-      }
-    }}
-    className="text-white bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded-md mt-4"
-  >
-    Agregar Módulo
-  </button>
-</div>
+        </div>
 
-{/* Lista de profesores */}
-<div className="p-6 border-t border-gray-200">
-  <h3 className="text-xl font-semibold mb-4">Profesores</h3>
-  {curso.professorDTOS.length > 0 ? (
-    <ul className="list-disc pl-5 space-y-2 text-gray-700">
-      {curso.professorDTOS.map((profesor, index) => (
-        <li key={index} className="flex justify-between items-center">
-          <span>
-            {profesor.name} {profesor.lastName} (Cédula: {profesor.cedula})
-          </span>
+        {/* Lista de miembros */}
+        <div className="p-6 border-t border-gray-200">
+          <h3 className="text-xl font-semibold mb-4">Participantes</h3>
+          {curso.miembroDTOList.length > 0 ? (
+            <ul className="list-disc pl-5 space-y-2 text-gray-700">
+              {curso.miembroDTOList.map((miembro, index) => (
+                <li key={index} className="flex justify-between items-center">
+                  <span>
+                    {miembro.nombre} {miembro.apellido} (Cédula: {miembro.cedula})
+                  </span>
+                  <button
+                    onClick={() => handleDeleteMiembro(miembro.cedula)}
+                    className="text-red-500 ml-4"
+                  >
+                    Eliminar
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No hay participantes asignados.</p>
+          )}
           <button
-            onClick={() => handleDeleteProfesor(profesor.cedula)}
-            className="text-red-500 ml-4"
+            onClick={() => setEditMiembroModalOpen(true)}
+            className="text-white bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded-md mt-4"
           >
-            Eliminar
+            Agregar Participante
           </button>
-        </li>
-      ))}
-    </ul>
-  ) : (
-    <p>No hay profesores asignados.</p>
-  )}
-  <button
-    onClick={() => setEditProfesorModalOpen(true)}
-    className="text-white bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded-md mt-4"
-  >
-    Agregar Profesor
-  </button>
-</div>
+        </div>
+      </div>
 
-{/* Lista de miembros */}
-<div className="p-6 border-t border-gray-200">
-  <h3 className="text-xl font-semibold mb-4">Participantes</h3>
-  {curso.miembroDTOList.length > 0 ? (
-    <ul className="list-disc pl-5 space-y-2 text-gray-700">
-      {curso.miembroDTOList.map((miembro, index) => (
-        <li key={index} className="flex justify-between items-center">
-          <span>
-            {miembro.nombre} {miembro.apellido} (Cédula: {miembro.cedula})
-          </span>
-          <button
-            onClick={() => handleDeleteMiembro(miembro.cedula)}
-            className="text-red-500 ml-4"
-          >
-            Eliminar
-          </button>
-        </li>
-      ))}
-    </ul>
-  ) : (
-    <p>No hay participantes asignados.</p>
-  )}
-  <button
-    onClick={() => setEditMiembroModalOpen(true)}
-    className="text-white bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded-md mt-4"
-  >
-    Agregar Participante
-  </button>
-</div>
-
-{/* Modales de edición */}
-{isEditProfesorModalOpen && (
-  <EditProfesorModal
-    cursoId={selectedCursoId}
-    onClose={() => setEditProfesorModalOpen(false)}
-    onSave={(profesor: Profesor) => {
-      setCurso((prevCurso) => {
-        if (prevCurso) {
-          return {
-            ...prevCurso,
-            professorDTOS: [...prevCurso.professorDTOS, profesor],
-          };
-        }
-        return prevCurso;
-      });
-    }}
-  />
-)}
-
-{isEditMiembroModalOpen && (
-  <EditMiembroModal
-    cursoId={selectedCursoId}
-    onClose={() => setEditMiembroModalOpen(false)}
-    onSave={(miembro: Miembro) => {
-      setCurso((prevCurso) => {
-        if (prevCurso) {
-          return {
-            ...prevCurso,
-            miembroDTOList: [...prevCurso.miembroDTOList, miembro],
-          };
-        }
-        return prevCurso;
-      });
-    }}
-  />
-)}
-
-{isEditModuloModalOpen && (
-  <EditModuloModal
-    cursoId={selectedCursoId}
-    onClose={() => setEditModuloModalOpen(false)}
-    onSave={(modulo: Modulo) => {
-      setCurso((prevCurso) => {
-        if (prevCurso) {
-          return {
-            ...prevCurso,
-            moduloList: [...prevCurso.moduloList, modulo],
-          };
-        }
-        return prevCurso;
-      });
-    }}
-  />
-)}
+      {/* Modales de edición */}
+      {isEditModalOpen && (
+        <EditCursoModal
+          curso={curso}
+          onClose={() => setEditModalOpen(false)}
+          onSave={handleSave}
+        />
+      )}
+      {isEditProfesorModalOpen && (
+        <EditProfesorModal
+          cursoId={selectedCursoId}
+          onClose={() => setEditProfesorModalOpen(false)}
+          onSave={(profesor: Profesor) => {
+            setCurso((prevCurso) => {
+              if (prevCurso) {
+                return {
+                  ...prevCurso,
+                  professorDTOS: [...prevCurso.professorDTOS, profesor],
+                };
+              }
+              return prevCurso;
+            });
+          }}
+        />
+      )}
+      {isEditMiembroModalOpen && (
+        <EditMiembroModal
+          cursoId={selectedCursoId}
+          onClose={() => setEditMiembroModalOpen(false)}
+          onSave={(miembro: Miembro) => {
+            setCurso((prevCurso) => {
+              if (prevCurso) {
+                return {
+                  ...prevCurso,
+                  miembroDTOList: [...prevCurso.miembroDTOList, miembro],
+                };
+              }
+              return prevCurso;
+            });
+          }}
+        />
+      )}
+      {isEditModuloModalOpen && (
+        <EditModuloModal
+          cursoId={selectedCursoId}
+          onClose={() => setEditModuloModalOpen(false)}
+          onSave={(modulo: Modulo) => {
+            setCurso((prevCurso) => {
+              if (prevCurso) {
+                return {
+                  ...prevCurso,
+                  moduloList: [...prevCurso.moduloList, modulo],
+                };
+              }
+              return prevCurso;
+            });
+          }}
+        />
+      )}
+    </div>
+  );
+}
