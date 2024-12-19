@@ -38,7 +38,7 @@ interface Miembro {
 }
 
 export default function CursoPage() {
-  const { id } = useParams();
+  const { id } = useParams() as { id: string };
   const [curso, setCurso] = useState<Curso | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isEditModalOpen, setEditModalOpen] = useState(false);
