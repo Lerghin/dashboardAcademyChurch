@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 export default function GrupoPage() {
   const { id } = useParams();
   const [data, setData] = useState(null);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [cedula, setCedula] = useState('');
@@ -24,7 +24,7 @@ export default function GrupoPage() {
         setData(result);
         setNombreGrupo(result.numeroGrupo);
       } catch (err) {
-        setError(err.message);
+        setError(err instanceof Error ? err.message : String(err));
       }
     };
     fetchData();
@@ -41,7 +41,7 @@ export default function GrupoPage() {
       setError('La cédula no puede estar vacía');
       return;
     }
-  
+
     setLoading(true);
     setSuccessMessage('');
     setError('');
@@ -50,45 +50,44 @@ export default function GrupoPage() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
       });
-  
+
       if (!response.ok) {
-        const errorData = await response.text(); // Lee el mensaje de error enviado por el backend
+        const errorData = await response.text();
         throw new Error(errorData);
       }
-  
+
       const updatedGroup = await response.json();
       setData(updatedGroup);
       setCedula('');
       setSuccessMessage('Miembro agregado con éxito');
     } catch (err) {
-      setError(err.message); // Muestra el mensaje de error en el frontend
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
     }
   };
-  
-  
+
   const handleRemoveMember = async (idMiembro: string) => {
     if (!confirm('¿Seguro que deseas eliminar este miembro?')) return;
-  
+
     setLoading(true);
     try {
-      // Enviar idMiembro como parte de los parámetros de la URL
       const response = await fetch(`${API_URL}grupo/remove-member/${id}?idMiembro=${idMiembro}`, {
-        method: 'PUT', 
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
       });
-  
+
       if (!response.ok) throw new Error('Error al eliminar el miembro');
-  
+
       const updatedGroup = await response.json();
-      setData(updatedGroup); // Actualizar el estado con el grupo modificado
+      setData(updatedGroup);
     } catch (err) {
-      setError(err.message);
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
     }
   };
+
   const handleEditGroupName = async () => {
     setLoading(true);
     setSuccessMessage('');
@@ -106,7 +105,7 @@ export default function GrupoPage() {
       setIsEditOpen(false);
       setSuccessMessage('Nombre del grupo actualizado con éxito');
     } catch (err) {
-      setError(err.message);
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
     }
@@ -157,49 +156,47 @@ export default function GrupoPage() {
         </div>
       </div>
 
-      {/* Modal para Agregar Miembro */}
       {isModalOpen && (
-  <div className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 h-screen">
-    <div className="bg-white p-8 rounded-lg w-full max-w-lg">
-      <h2 className="text-2xl font-semibold mb-4 text-blue-700">Agregar Miembro</h2>
-      <div className="mb-4">
-        <label htmlFor="cedula" className="block text-sm font-medium text-gray-700">
-          Cédula del Miembro
-        </label>
-        <input
-          id="cedula"
-          type="text"
-          value={cedula}
-          onChange={(e) => setCedula(e.target.value)}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-        />
-      </div>
-      {successMessage && (
-        <p className="text-green-600 font-medium">{successMessage}</p>
+        <div className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 h-screen">
+          <div className="bg-white p-8 rounded-lg w-full max-w-lg">
+            <h2 className="text-2xl font-semibold mb-4 text-blue-700">Agregar Miembro</h2>
+            <div className="mb-4">
+              <label htmlFor="cedula" className="block text-sm font-medium text-gray-700">
+                Cédula del Miembro
+              </label>
+              <input
+                id="cedula"
+                type="text"
+                value={cedula}
+                onChange={(e) => setCedula(e.target.value)}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+              />
+            </div>
+            {successMessage && (
+              <p className="text-green-600 font-medium">{successMessage}</p>
+            )}
+            {error && (
+              <p className="text-red-600 font-medium">{error}</p>
+            )}
+            <div className="flex justify-between mt-6">
+              <button
+                onClick={() => handleAddMember(cedula)}
+                disabled={loading}
+                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+              >
+                {loading ? 'Agregando...' : 'Agregar'}
+              </button>
+              <button
+                onClick={handleModalToggle}
+                className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
       )}
-      {error && (
-        <p className="text-red-600 font-medium">{error}</p>
-      )}
-      <div className="flex justify-between mt-6">
-        <button
-          onClick={() => handleAddMember(cedula)}
-          disabled={loading}
-          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-        >
-          {loading ? 'Agregando...' : 'Agregar'}
-        </button>
-        <button
-          onClick={handleModalToggle}
-          className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
-        >
-          Cerrar
-        </button>
-      </div>
-    </div>
-  </div>
-)}
 
-      {/* Modal para Editar Nombre del Grupo */}
       {isEditOpen && (
         <div className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 h-screen">
           <div className="bg-white p-8 rounded-lg w-full max-w-lg">
