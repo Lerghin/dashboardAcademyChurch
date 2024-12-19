@@ -10,7 +10,7 @@ import EditProfesorModal from "@/app/components/forms/EditProfesorModal";
 import EditModuloModal from "@/app/components/forms/EditModuloModal";
 
 export default function CursoPage() {
-  const { id } = useParams<string>();
+  const { id } = useParams();
   const [curso, setCurso] = useState(null);
   const [error, setError] = useState<string | null>(null);
   const [isEditModalOpen, setEditModalOpen] = useState(false);
@@ -31,7 +31,11 @@ export default function CursoPage() {
 
         setCurso(result);
       } catch (err) {
-        setError(err.message);
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("Error desconocido");
+        }
       }
     };
     fetchData();

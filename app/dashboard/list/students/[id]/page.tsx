@@ -5,9 +5,9 @@ import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 export default function SingleStudentPage() {
-  const { id } = useParams<string>();
+  const { id } = useParams();
   const [data, setData] = useState(null);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     cedula: '',
@@ -32,7 +32,11 @@ export default function SingleStudentPage() {
         setData(result);
         setFormData(result); // Pre-cargar datos en el formulario
       } catch (err) {
-        setError(err.message);
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("Error desconocido");
+        }
       }
     };
     fetchData();
