@@ -5,13 +5,41 @@ import { useParams } from "next/navigation";
 import { API_URL } from "@/app/lib/config";
 import EditCursoModal from "@/app/components/forms/EditCursoModal";
 import EditMiembroModal from "@/app/components/forms/EditMiembroModal";
-
 import EditProfesorModal from "@/app/components/forms/EditProfesorModal";
 import EditModuloModal from "@/app/components/forms/EditModuloModal";
 
+interface Curso {
+  idCurso: string;
+  nombreCurso: string;
+  descripcion: string;
+  fecha_inicio: string;
+  fecha_fin: string;
+  moduloList: Modulo[];
+  professorDTOS: Profesor[];
+  miembroDTOList: Miembro[];
+}
+
+interface Modulo {
+  idModulo: string;
+  numModulo: string;
+  descripcion: string;
+}
+
+interface Profesor {
+  name: string;
+  lastName: string;
+  cedula: string;
+}
+
+interface Miembro {
+  nombre: string;
+  apellido: string;
+  cedula: string;
+}
+
 export default function CursoPage() {
   const { id } = useParams();
-  const [curso, setCurso] = useState(null);
+  const [curso, setCurso] = useState<Curso | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isEditModalOpen, setEditModalOpen] = useState(false);
   const [isEditProfesorModalOpen, setEditProfesorModalOpen] = useState(false);
@@ -54,12 +82,12 @@ export default function CursoPage() {
   }
 
   // Función de guardado
-  const handleSave = (updatedCurso) => {
+  const handleSave = (updatedCurso: Curso) => {
     setCurso(updatedCurso);
   };
 
   // Eliminar profesor
-  const handleDeleteProfesor = async (cedula) => {
+  const handleDeleteProfesor = async (cedula: string) => {
     if (!confirm("¿Seguro que deseas eliminar este profesor?")) return;
     try {
       const response = await fetch(`${API_URL}curso/delete/${cedula}/${id}`, {
@@ -67,32 +95,35 @@ export default function CursoPage() {
       });
       if (!response.ok) throw new Error("Error al eliminar profesor");
       window.location.reload();
-      const updatedCurso = await response.text();
-      
     } catch (err) {
-      setError(err.message);
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Error desconocido");
+      }
     }
   };
 
   // Eliminar miembro
-  const handleDeleteMiembro = async (cedula) => {
+  const handleDeleteMiembro = async (cedula: string) => {
     if (!confirm("¿Seguro que deseas eliminar este participante?")) return;
     try {
       const response = await fetch(`${API_URL}curso/delete-member/${id}/${cedula}`, {
         method: "PUT",
       });
       if (!response.ok) throw new Error("Error al eliminar miembro");
-     
       window.location.reload();
-      const updatedCurso = await response.text();
-     
     } catch (err) {
-      setError(err.message);
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Error desconocido");
+      }
     }
   };
 
   // Eliminar módulo
-  const handleDeleteModulo = async (idModulo, idCurso) => {
+  const handleDeleteModulo = async (idModulo: string, idCurso: string) => {
     if (!confirm("¿Seguro que deseas eliminar este modulo?")) return;
 
     try {
@@ -106,7 +137,7 @@ export default function CursoPage() {
         }
       );
 
-      const data = await response.text();
+      const data = await response.json();
 
       if (!response.ok) {
         throw new Error(data.error || "Error al eliminar módulo");
@@ -117,8 +148,13 @@ export default function CursoPage() {
       // Recargar la página después de eliminar el módulo
       window.location.reload();
     } catch (err) {
-      console.error("Error al eliminar módulo:", err.message);
-      alert("Error al eliminar módulo: " + err.message);
+      if (err instanceof Error) {
+        console.error("Error al eliminar módulo:", err.message);
+        alert("Error al eliminar módulo: " + err.message);
+      } else {
+        console.error("Error desconocido al eliminar módulo");
+        alert("Error desconocido al eliminar módulo");
+      }
     }
   };
 
@@ -188,7 +224,7 @@ export default function CursoPage() {
           <EditModuloModal
             cursoId={selectedCursoId} // Pasar el idCurso seleccionado al modal
             onClose={() => setEditModuloModalOpen(false)}
-            onSave={(modulo) => {
+            onSave={(modulo: Modulo) => {
               // Aquí puedes actualizar la lista de módulos con el nuevo módulo
             }}
           />
@@ -265,12 +301,17 @@ export default function CursoPage() {
         <EditProfesorModal
           cursoId={curso.idCurso} // Enviar el cursoId como prop
           onClose={() => setEditProfesorModalOpen(false)}
-          onSave={(profesor) => {
+          onSave={(profesor: Profesor) => {
             // Actualizar profesores en el estado del curso si es necesario
-            setCurso((prevCurso) => ({
-              ...prevCurso,
-              professorDTOS: [...prevCurso.professorDTOS, profesor],
-            }));
+            setCurso((prevCurso) => {
+              if (prevCurso) {
+                return {
+                  ...prevCurso,
+                  professorDTOS: [...prevCurso.professorDTOS, profesor],
+                };
+              }
+              return prevCurso;
+            });
           }}
         />
       )}
@@ -278,14 +319,34 @@ export default function CursoPage() {
         <EditMiembroModal
           cursoId={curso.idCurso}
           onClose={() => setEditMiembroModalOpen(false)}
-          onSave={handleSave}
+          onSave={(miembro: Miembro) => {
+            setCurso((prevCurso) => {
+              if (prevCurso) {
+                return {
+                  ...prevCurso,
+                  miembroDTOList: [...prevCurso.miembroDTOList, miembro],
+                };
+              }
+              return prevCurso;
+            });
+          }}
         />
       )}
       {isEditModuloModalOpen && (
         <EditModuloModal
-          id={curso.idCurso}
+          cursoId={curso.idCurso}
           onClose={() => setEditModuloModalOpen(false)}
-          onSave={handleSave}
+          onSave={(modulo: Modulo) => {
+            setCurso((prevCurso) => {
+              if (prevCurso) {
+                return {
+                  ...prevCurso,
+                  moduloList: [...prevCurso.moduloList, modulo],
+                };
+              }
+              return prevCurso;
+            });
+          }}
         />
       )}
     </div>
