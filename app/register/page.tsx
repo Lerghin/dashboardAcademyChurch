@@ -35,6 +35,11 @@ const RegisterPage = () => {
     }
   };
 
+
+  const handleGoBack = () => {
+    window.location.href = '/dashboard/admin';
+  };
+
   return (
     <>
       <style jsx>{`
@@ -217,8 +222,8 @@ const RegisterPage = () => {
 
           {/* Botón de Atrás */}
           <button onClick={handleGoBack} className="back-button">
-            Atrás
-          </button>
+        Atrás
+      </button>
         </div>
       </div>
     </>
