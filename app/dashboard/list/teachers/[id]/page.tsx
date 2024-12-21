@@ -4,11 +4,26 @@ import { API_URL } from '@/app/lib/config';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+interface ProfessorData {
+  name: string;
+  lastName: string;
+  cedula: string;
+  fecha_nacimiento: string;
+  address: string;
+  phone: string;
+  email: string;
+  cursos: string[];
+  edad: number; // Add this line
+}
+
+
+
 export default function SingleProfessorPage() {
   const { id } = useParams(); // Obtiene el ID del profesor desde la URL
-  const [data, setData] = useState(null);
+
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [data, setData] = useState<ProfessorData | null>(null);
   const [formData, setFormData] = useState<{
     name: string;
     lastName: string;
@@ -95,18 +110,19 @@ export default function SingleProfessorPage() {
       if (!response.ok) throw new Error('Error al actualizar los datos');
   
       // Actualiza el estado de los datos con los nuevos valores
-      setData({
-        ...data,
-        name: formData.name,
-        lastName: formData.lastName,
-        cedula: formData.cedula,
-        fecha_nacimiento: formData.fecha_nacimiento,
-        address: formData.address,
-        phone: formData.phone,
-        email: formData.email,
-        cursos: formData.cursos,
-      });
-  
+      if (data && typeof data === 'object') {
+        setData({
+          ...data,
+          name: formData.name,
+          lastName: formData.lastName,
+          cedula: formData.cedula,
+          fecha_nacimiento: formData.fecha_nacimiento,
+          address: formData.address,
+          phone: formData.phone,
+          email: formData.email,
+          cursos: formData.cursos,
+        });
+      }
       // Cierra el modal y muestra un mensaje de éxito
       alert('Datos actualizados exitosamente');
       setShowModal(false);
