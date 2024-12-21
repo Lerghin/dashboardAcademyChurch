@@ -9,7 +9,16 @@ export default function SingleProfessorPage() {
   const [data, setData] = useState(null);
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string;
+    lastName: string;
+    cedula: string;
+    fecha_nacimiento: string;
+    address: string;
+    phone: string;
+    email: string;
+    cursos: string[];
+  }>({
     name: '',
     lastName: '',
     cedula: '',
@@ -60,7 +69,7 @@ export default function SingleProfessorPage() {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
-  const handleCursosChange = (e, index) => {
+  const handleCursosChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
     const newCursos = [...formData.cursos];
     newCursos[index] = e.target.value;
     setFormData((prev) => ({ ...prev, cursos: newCursos }));
