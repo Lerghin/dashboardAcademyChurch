@@ -1,3 +1,4 @@
+import { API_URL } from '@/app/lib/config';
 import React, { useState } from 'react';
 
 interface TeacherFormProps {
