@@ -23,7 +23,7 @@ const RegisterPage = () => {
 
     setIsLoading(true);
     try {
-      const response = await axios.post(`${API_URL}admin/register`, {
+      const response = await axios.post(`${API_URL}auth/admin/register`, {
         userName,
         password,
       });
