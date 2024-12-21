@@ -79,7 +79,7 @@ export default function SingleProfessorPage() {
     setFormData((prev) => ({ ...prev, cursos: [...prev.cursos, ''] }));
   };
 
-  const removeCurso = (index) => {
+  const removeCurso = (index: number) => {
     const newCursos = formData.cursos.filter((_, i) => i !== index);
     setFormData((prev) => ({ ...prev, cursos: newCursos }));
   };
