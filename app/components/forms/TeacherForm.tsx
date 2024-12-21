@@ -1,16 +1,20 @@
-import { API_URL } from '@/app/lib/config';
 import React, { useState } from 'react';
 
-const TeacherForm = () => {
+interface TeacherFormProps {
+  type: "create" | "update";
+  data?: any;
+}
+
+const TeacherForm: React.FC<TeacherFormProps> = ({ type, data }) => {
   const [formData, setFormData] = useState({
-    name: '',
-    lastName: '',
-    email: '',
-    address: '',
-    cedula: '',
-    phone: '',
-    fecha_nacimiento: '',
-    cursos: [''],
+    name: data?.name || '',
+    lastName: data?.lastName || '',
+    email: data?.email || '',
+    address: data?.address || '',
+    cedula: data?.cedula || '',
+    phone: data?.phone || '',
+    fecha_nacimiento: data?.fecha_nacimiento || '',
+    cursos: data?.cursos || [''],
   });
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -33,29 +37,31 @@ const TeacherForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch(`${API_URL}profe/create`, {
+      const response = await fetch(`${API_URL}profe/${type === 'create' ? 'create' : 'update'}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
 
-      if (!response.ok) throw new Error('Error al crear el profesor');
+      if (!response.ok) throw new Error(`Error al ${type === 'create' ? 'crear' : 'actualizar'} el profesor`);
 
-      setSuccess('Profesor creado con éxito');
+      setSuccess(`Profesor ${type === 'create' ? 'creado' : 'actualizado'} con éxito`);
       setError(null); // Limpiar errores
-      setFormData({
-        name: '',
-        lastName: '',
-        email: '',
-        address: '',
-        cedula: '',
-        phone: '',
-        fecha_nacimiento: '',
-        cursos: [''],
-      }); // Limpiar formulario
+      if (type === 'create') {
+        setFormData({
+          name: '',
+          lastName: '',
+          email: '',
+          address: '',
+          cedula: '',
+          phone: '',
+          fecha_nacimiento: '',
+          cursos: [''],
+        }); // Limpiar formulario
+      }
     } catch (err) {
       console.error(err);
-      setError('Hubo un problema al crear el profesor');
+      setError(`Hubo un problema al ${type === 'create' ? 'crear' : 'actualizar'} el profesor`);
       setSuccess(null);
     }
   };
@@ -123,7 +129,7 @@ const TeacherForm = () => {
             placeholder="Fecha de Nacimiento"
           />
         </div>
-        <button type="submit" className="mt-4 p-3 bg-blue-500 text-white rounded-md">Crear Profesor</button>
+        <button type="submit" className="mt-4 p-3 bg-blue-500 text-white rounded-md">{type === 'create' ? 'Crear Profesor' : 'Actualizar Profesor'}</button>
       </form>
     </div>
   );
