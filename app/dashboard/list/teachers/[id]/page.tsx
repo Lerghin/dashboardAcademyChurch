@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 export default function SingleProfessorPage() {
   const { id } = useParams(); // Obtiene el ID del profesor desde la URL
   const [data, setData] = useState(null);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -41,7 +41,11 @@ export default function SingleProfessorPage() {
           cursos: result.cursos || [],
         });
       } catch (err) {
-        setError(err.message);
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('An unknown error occurred');
+        }
       }
     };
 
