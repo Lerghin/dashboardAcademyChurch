@@ -8,7 +8,7 @@ import { API_URL } from "@/app/lib/config";
 const LoginPage = () => {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async () => {
@@ -18,32 +18,19 @@ const LoginPage = () => {
     }
 
     setIsLoading(true);
-    setErrorMessage(null);
-
     try {
-      const response = await axios.post(`${API_URL}auth/login`, {
+      const response = await axios.post(`${API_URL}/login`, {
         userName,
         password,
       });
-
-      const { token, user } = response.data;
-
-      // Guardar token y usuario en Zustand
-      useAuthStore.getState().setToken(token);
-
-      alert("Inicio de sesión exitoso");
-      window.location.href = "/dashboard/admin";
+      // Handle successful login
+      setIsLoading(false);
     } catch (error) {
-      if (error.response && error.response.status === 401) {
-        setErrorMessage("Credenciales inválidas.");
-      } else {
-        setErrorMessage("Error al conectar con el servidor. Intenta nuevamente más tarde.");
-      }
-      console.error(error);
-    } finally {
+      setErrorMessage("Error al iniciar sesión. Por favor, inténtalo de nuevo.");
       setIsLoading(false);
     }
   };
+
 
   return (
     <>
