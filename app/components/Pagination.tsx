@@ -1,6 +1,14 @@
 'use client'
 
-const Pagination = ({ totalPages, currentPage, onPageChange }) => {
+import React from "react";
+
+interface PaginationProps {
+  totalPages: number;        // Total de páginas
+  currentPage: number;       // Página actual
+  onPageChange: (page: number) => void; // Función para manejar el cambio de página
+}
+
+const Pagination: React.FC<PaginationProps> = ({ totalPages, currentPage, onPageChange }) => {
   const handlePrev = () => {
     if (currentPage > 1) {
       onPageChange(currentPage - 1);

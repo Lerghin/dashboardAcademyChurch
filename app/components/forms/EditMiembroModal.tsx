@@ -38,7 +38,11 @@ const EditMiembroModal: React.FC<EditMiembroModalProps> = ({ cursoId, onClose, o
       alert('Miembro agregado exitosamente')
       window.location.reload();
     } catch (err) {
-      alert(`Error: ${err.message}`);
+      if (err instanceof Error) {
+        alert(`Error: ${err.message}`);
+      } else {
+        alert("An unknown error occurred");
+      }
     }
   };
 

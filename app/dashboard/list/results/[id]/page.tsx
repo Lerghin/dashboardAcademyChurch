@@ -32,12 +32,12 @@ interface ModuleListPageProps {
 
 const ModuleListPage = ({ params }: ModuleListPageProps) => {
   const [modules, setModules] = useState<ModuloDTO[]>([]);
-  const { id } = useParams<string>();
+  const { id } = useParams();
 
   useEffect(() => {
     const fetchModules = async () => {
       const response = await fetch(`${API_URL}modulo/getmodulodto/${id}`, { cache: "no-store" });
-      console.log(response);
+      console.log('');
       if (response.ok) {
         const data: ModuloCursoDTO = await response.json();
         setModules(data.moduloDTOList);

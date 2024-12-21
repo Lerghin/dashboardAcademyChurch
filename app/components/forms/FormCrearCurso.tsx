@@ -1,9 +1,38 @@
 'use client';
-
 import { useState } from 'react';
 import { API_URL } from '@/app/lib/config';
 
-export default function CreateCoursePage() {
+interface Miembro {
+  cedula: string;
+  nombre: string;
+  apellido: string;
+}
+
+interface Profesor {
+  cedula: string;
+  name: string;
+  lastName: string;
+}
+
+interface Modulo {
+  numModulo: string;
+  descripcion: string;
+}
+
+interface DynamicSectionProps {
+  title: string;
+  list: any[];
+  setList: React.Dispatch<React.SetStateAction<any[]>>;
+  fields: { key: string; label: string }[];
+}
+
+interface StudentFormProps {
+  type: 'create' | 'update';
+  data?: any;
+  table: string;
+}
+
+const CreateCoursePage: React.FC<StudentFormProps> = ({ type, data }) => {
   const [curso, setCurso] = useState({
     nombreCurso: '',
     descripcion: '',
@@ -11,14 +40,15 @@ export default function CreateCoursePage() {
     fecha_fin: '',
   });
 
-  const [miembros, setMiembros] = useState([]);
-  const [profesores, setProfesores] = useState([]);
-  const [modulos, setModulos] = useState([]);
+  // Tipado de los estados de los miembros, profesores y módulos
+  const [miembros, setMiembros] = useState<Miembro[]>([]);
+  const [profesores, setProfesores] = useState<Profesor[]>([]);
+  const [modulos, setModulos] = useState<Modulo[]>([]);
 
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  const handleCursoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCursoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setCurso({ ...curso, [e.target.name]: e.target.value });
   };
 
@@ -134,8 +164,7 @@ export default function CreateCoursePage() {
 
         {/* Botones */}
         <div className="flex justify-between mt-6">
-          <button type="reset" className="px-6 py-2 bg-gray-400 text-white rounded-md"       onClick={() => {
-            
+          <button type="reset" className="px-6 py-2 bg-gray-400 text-white rounded-md" onClick={() => {
             window.location.reload(); // Recarga la página
           }}>
             Limpiar
@@ -147,15 +176,16 @@ export default function CreateCoursePage() {
       </form>
     </div>
   );
-}
+};
+const DynamicSection: React.FC<DynamicSectionProps> = ({ title, list, setList, fields }) => {
+  // Define the type for item based on the fields
+  type ItemType = Record<string, string>;
 
-// Componente reutilizable para secciones dinámicas
-function DynamicSection({ title, list, setList, fields }) {
-  const [item, setItem] = useState(() =>
-    fields.reduce((acc, field) => ({ ...acc, [field.key]: '' }), {})
-  );
+  const initialItemState: ItemType = fields.reduce((acc, field) => ({ ...acc, [field.key]: '' }), {});
 
-  const handleChange = (e) => {
+  const [item, setItem] = useState<ItemType>(initialItemState);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setItem({ ...item, [e.target.name]: e.target.value });
   };
 
@@ -172,7 +202,7 @@ function DynamicSection({ title, list, setList, fields }) {
           <input
             key={field.key}
             name={field.key}
-            value={item[field.key]}
+            value={item[field.key]} // Now TypeScript knows item is of type ItemType
             onChange={handleChange}
             placeholder={field.label}
             className="p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
@@ -186,15 +216,9 @@ function DynamicSection({ title, list, setList, fields }) {
           Agregar
         </button>
       </div>
-      <div
-        className="space-y-2 max-h-40 overflow-y-auto border p-3 rounded-md"
-        style={{ maxHeight: '200px' }}
-      >
+      <div className="space-y-2 max-h-40 overflow-y-auto border p-3 rounded-md" style={{ maxHeight: '200px' }}>
         {list.map((el, idx) => (
-          <div
-            key={idx}
-            className="flex justify-between items-center bg-gray-100 p-3 rounded-md shadow-sm"
-          >
+          <div key={idx} className="flex justify-between items-center bg-gray-100 p-3 rounded-md shadow-sm">
             <div className="flex-1">
               {fields.map((field) => (
                 <span key={field.key} className="mr-4">
@@ -214,4 +238,8 @@ function DynamicSection({ title, list, setList, fields }) {
       </div>
     </div>
   );
-}
+};
+
+
+
+export default CreateCoursePage;

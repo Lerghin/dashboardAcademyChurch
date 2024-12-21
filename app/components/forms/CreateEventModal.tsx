@@ -1,24 +1,17 @@
 import { API_URL } from "@/app/lib/config";
 import { useState, useEffect } from "react";
 
-interface Event {
-  eventId: string;
-  nameEvents: string;
-  description: string;
-  fecha_inicio: string;
-}
-
+// Definición de las propiedades que acepta el componente
 interface FormModalProps {
+  type: string;
   table: string;
-  type: "create" | "update"; 
-  onClose: () => void;
-  onSave: (event: Event) => void;
   id?: string;
-  data?: Event; 
+  data?: any;
+  onClose?: () => void; // Agregado onClose aquí
+  onSave?: () => void;
 }
 
 const CreateEventModal: React.FC<FormModalProps> = ({ table, type, onClose, onSave, id, data }) => {
-   
   const [nameEvents, setNameEvents] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [fecha_inicio, setFechaInicio] = useState<string>("");
@@ -48,10 +41,10 @@ const CreateEventModal: React.FC<FormModalProps> = ({ table, type, onClose, onSa
 
   const handleSubmit = async () => {
     const eventPayload = { nameEvents, description, fecha_inicio };
-
+  
     try {
       let response;
-
+  
       if (type === "update" && id) {
         response = await fetch(`${API_URL}${table}/update/${id}`, {
           method: "PUT",
@@ -65,19 +58,24 @@ const CreateEventModal: React.FC<FormModalProps> = ({ table, type, onClose, onSa
           body: JSON.stringify(eventPayload),
         });
       }
-
+  
       if (!response.ok) {
         throw new Error("Error al guardar el evento");
       }
-
+  
       const savedEvent = await response.text();
-
+  
       // Llama la función onSave si es necesario
       window.location.reload(); // Recarga la página para reflejar los cambios
     } catch (err) {
-      alert(`Error: ${err.message}`);
+      if (err instanceof Error) {
+        alert(`Error: ${err.message}`);
+      } else {
+        alert("An unknown error occurred");
+      }
     }
   };
+  
 
   return (
     <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
@@ -116,7 +114,7 @@ const CreateEventModal: React.FC<FormModalProps> = ({ table, type, onClose, onSa
         <div className="flex justify-between">
           <button
             onClick={() => {
-            
+              if (onClose) onClose(); // Llamar onClose si se pasa como propiedad
               window.location.reload(); // Recarga la página
             }}
             className="px-4 py-2 bg-gray-300 rounded-md text-gray-700 hover:bg-gray-400"

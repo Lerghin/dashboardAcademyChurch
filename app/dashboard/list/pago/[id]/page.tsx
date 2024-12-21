@@ -8,6 +8,8 @@ interface Pago {
   idPago: string;
   miembro: {
     cedula: string;
+    nombre: string;
+    apellido: string;
   };
   fecha_pago: string;
   metodoPago: string;
@@ -17,7 +19,7 @@ interface Pago {
 }
 
 export default function PagoDetail() {
-  const { id } = useParams<string>();
+  const { id } = useParams();
   const [pago, setPago] = useState<Pago | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,7 +44,7 @@ export default function PagoDetail() {
         setFormData(result); // Pre-cargar datos en el formulario
         setPago(result);
       } catch (err) {
-        setError(err.message);
+        setError(err instanceof Error ? err.message : String(err));
       }
     };
     fetchData();

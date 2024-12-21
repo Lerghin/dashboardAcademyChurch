@@ -3,8 +3,27 @@
 import { API_URL } from '@/app/lib/config';
 import { useState } from 'react';
 
-export default function CreateStudentPage() {
-  const [formData, setFormData] = useState({
+interface StudentFormProps {
+  type: string; // Puedes usar un tipo más específico si es necesario
+  data?: {
+    cedula: string;
+    nombre: string;
+    apellido: string;
+    fecha_nacimiento: string;
+    direccion: string;
+    ocupacion: string;
+    telefono: string;
+    sexo: string;
+    status: string;
+    fecha_ingreso: string;
+    cursosRealizados: Record<string, string>; // Cursos con su nivel
+    nuevoCurso: string;
+    nuevoNivel: string;
+  }; // Ajusta el tipo según la estructura de tus datos
+}
+
+const StudentForm: React.FC<StudentFormProps> = ({ type, data }) => {
+  const [formData, setFormData] = useState(data || {
     cedula: '',
     nombre: '',
     apellido: '',
@@ -17,20 +36,22 @@ export default function CreateStudentPage() {
     fecha_ingreso: '',
     cursosRealizados: {},
     nuevoCurso: '',
-    nuevoNivel: ''
+    nuevoNivel: '',
   });
 
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prevState) => ({
       ...prevState,
-      [name]: value
+      [name]: value,
     }));
   };
-
+  
   const handleAddCourse = () => {
     if (formData.nuevoCurso && formData.nuevoNivel) {
       const newCourse = {
@@ -82,7 +103,7 @@ export default function CreateStudentPage() {
         nuevoCurso: '',
         nuevoNivel: ''
       });
-    }  catch (err) {
+    } catch (err) {
       console.error(err); // Esto te permitirá ver el error exacto en la consola
       setError('Hubo un problema al crear el miembro');
       setSuccess(null); // Limpiar éxito si hay un error
@@ -93,7 +114,7 @@ export default function CreateStudentPage() {
     <div className="w-full">
       <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden w-full">
         <div className="p-6 md:p-8">
-          <h2 className="text-2xl font-semibold mb-4 text-blue-700">Crear Nuevo Miembro</h2>
+          <h2 className="text-2xl font-semibold mb-4 text-blue-700">{type === 'edit' ? 'Editar Miembro' : 'Crear Nuevo Miembro'}</h2>
 
           {/* Mensajes de éxito o error */}
           {success && <div className="bg-green-200 p-4 mb-4 text-green-800 rounded-md">{success}</div>}
@@ -118,7 +139,7 @@ export default function CreateStudentPage() {
                 className="p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Apellido"
               />
-               <input
+              <input
                 type="text"
                 name="cedula"
                 value={formData.cedula}
@@ -157,7 +178,6 @@ export default function CreateStudentPage() {
                 className="p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Teléfono"
               />
-            
               <input
                 type="date"
                 name="fecha_ingreso"
@@ -165,38 +185,28 @@ export default function CreateStudentPage() {
                 onChange={handleInputChange}
                 className="p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-            <select
-            name="sexo"
-              value={formData.sexo}
-             onChange={handleInputChange}
-                  className="p-2 border rounded-md"
-                >
-             <option value="" disabled>Selecciona el sexo</option>
-            <option value="MASCULINO">Masculino</option>
-           <option value="FEMENINO">Femenino</option>
-          </select>
+              <select
+                name="sexo"
+                value={formData.sexo}
+                onChange={handleInputChange}
+                className="p-2 border rounded-md"
+              >
+                <option value="" disabled>Selecciona el sexo</option>
+                <option value="MASCULINO">Masculino</option>
+                <option value="FEMENINO">Femenino</option>
+              </select>
 
-       
-          <select
-           name="status"
-            value={formData.status}
-            onChange={handleInputChange}
-            className="p-2 border rounded-md"
-            >
-           <option value="" disabled>Selecciona el status</option>
-           <option value="REGULAR">REGULAR</option>
-            <option value="MIEMBRONUEVO">MIEMBRONUEVO</option>
-            <option value="RETIRADO">RETIRADO</option>
-        </select>
-
-          <input
-            type="date"
-            name="fecha_ingreso"
-            value={formData.fecha_ingreso}
-            onChange={handleInputChange}
-            className="p-2 border rounded-md"
-          />
-
+              <select
+                name="status"
+                value={formData.status}
+                onChange={handleInputChange}
+                className="p-2 border rounded-md"
+              >
+                <option value="" disabled>Selecciona el status</option>
+                <option value="REGULAR">REGULAR</option>
+                <option value="MIEMBRONUEVO">MIEMBRO NUEVO</option>
+                <option value="RETIRADO">RETIRADO</option>
+              </select>
 
               {/* Sección de cursos realizados */}
               <div className="col-span-2">
@@ -259,7 +269,7 @@ export default function CreateStudentPage() {
                   type="submit"
                   className="px-6 py-2 bg-blue-500 text-white rounded-md"
                 >
-                  Crear Miembro
+                  {type === 'edit' ? 'Actualizar Miembro' : 'Crear Miembro'}
                 </button>
               </div>
             </div>
@@ -268,4 +278,6 @@ export default function CreateStudentPage() {
       </div>
     </div>
   );
-}
+};
+
+export default StudentForm;
