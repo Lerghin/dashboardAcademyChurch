@@ -10,6 +10,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const setToken = useAuthStore((state) => state.setToken);
 
   const handleLogin = async () => {
     if (!userName || !password) {
@@ -18,19 +19,24 @@ const LoginPage = () => {
     }
 
     setIsLoading(true);
+
     try {
+      console.log("Sending login request to:", `${API_URL}auth/login`);
       const response = await axios.post(`${API_URL}auth/login`, {
         userName,
         password,
       });
-      // Handle successful login
+      console.log("Login response:", response.data);
+      const { token } = response.data;
+      setToken(token); // Save the token in Zustand store
+      window.location.href = "/dashboard/admin";
       setIsLoading(false);
     } catch (error) {
+      console.error("Login error:", error);
       setErrorMessage("Error al iniciar sesión. Por favor, inténtalo de nuevo.");
       setIsLoading(false);
     }
   };
-
 
   return (
     <>
