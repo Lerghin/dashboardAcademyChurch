@@ -7,8 +7,15 @@ interface Curso {
   descripcion: string;
   fecha_inicio: string;
   fecha_fin: string;
+
 }
 
+
+interface Miembro {
+  nombre: string;
+  apellido: string;
+  cedula: string;
+}
 interface EditCursoModalProps {
   curso: Curso;
   onClose: () => void;
@@ -21,25 +28,19 @@ export default function EditCursoModal({ curso, onClose, onSave }: EditCursoModa
   const [fechaInicio, setFechaInicio] = useState<string>(curso.fecha_inicio);
   const [fechaFin, setFechaFin] = useState<string>(curso.fecha_fin);
   const [id, setId] = useState<string>(curso.idCurso);
-  console.log(id);
 
   const handleSubmit = async () => {
-    const updatedCurso = { nombreCurso, descripcion, fecha_inicio: fechaInicio, fecha_fin: fechaFin, id: id };
+    const updatedCurso = { idCurso: id, nombreCurso, descripcion, fecha_inicio: fechaInicio, fecha_fin: fechaFin };
     try {
-      const response = await fetch(`${API_URL}curso/${id}`, {  // Usamos `curso.id` aquí
+      const response = await fetch(`${API_URL}curso/${id}`, {
         method: 'PUT',
         body: JSON.stringify(updatedCurso),
         headers: { 'Content-Type': 'application/json' },
       });
 
       if (!response.ok) throw new Error('Error al actualizar el curso');
-      /*const updatedData = await response.json();
-      onSave(updatedData);
-      onClose();*/
-
-      // Recargar la página después de guardar los cambios
-      alert("Cambio Realizado con exito")
-      window.location.reload();
+      onSave(updatedCurso);
+      onClose();
     } catch (err) {
       if (err instanceof Error) {
         alert(`Error: ${err.message}`);
@@ -98,10 +99,7 @@ export default function EditCursoModal({ curso, onClose, onSave }: EditCursoModa
 
         <div className="flex justify-between space-x-4">
           <button
-               onClick={() => {
-            
-                window.location.reload(); // Recarga la página
-              }}
+            onClick={onClose}
             className="px-4 py-2 bg-gray-300 rounded-md text-gray-700 hover:bg-gray-400 w-full"
           >
             Cerrar

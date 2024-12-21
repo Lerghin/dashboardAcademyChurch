@@ -7,6 +7,7 @@ import EditCursoModal from "@/app/components/forms/EditCursoModal";
 import EditMiembroModal from "@/app/components/forms/EditMiembroModal";
 import EditProfesorModal from "@/app/components/forms/EditProfesorModal";
 import EditModuloModal from "@/app/components/forms/EditModuloModal";
+import { Modulo } from "@/app/dashboard/list/subjects/types";
 
 interface Curso {
   idCurso: string;
@@ -19,11 +20,14 @@ interface Curso {
   miembroDTOList: Miembro[];
 }
 
-interface Modulo {
-  idModulo: string;
-  numModulo: string;
-  descripcion: string;
+interface CursoMod {
+  idCurso: Curso['idCurso'];
+  nombreCurso: Curso['nombreCurso'];
+  descripcion: Curso['descripcion'];
+  fecha_inicio: Curso['fecha_inicio'];
+  fecha_fin: Curso['fecha_fin'];
 }
+
 
 interface Profesor {
   name: string;
@@ -40,6 +44,7 @@ interface Miembro {
 export default function CursoPage() {
   const { id } = useParams() as { id: string };
   const [curso, setCurso] = useState<Curso | null>(null);
+  const [cursoMod, setCursoMod] = useState<CursoMod | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isEditModalOpen, setEditModalOpen] = useState(false);
   const [isEditProfesorModalOpen, setEditProfesorModalOpen] = useState(false);
@@ -57,6 +62,7 @@ export default function CursoPage() {
         if (!response.ok) throw new Error("Error al cargar datos del curso");
         const result: Curso = await response.json();
         setCurso(result);
+        setCursoMod(result);
       } catch (err) {
         if (err instanceof Error) {
           setError(err.message);
@@ -80,16 +86,43 @@ export default function CursoPage() {
     );
   }
 
-  const handleSaveCurso = (updatedCurso: Curso) => {
-    setCurso(updatedCurso);
+  const handleSaveCurso = (updatedCurso: CursoMod) => {
+    setCursoMod(updatedCurso);
   };
 
   const handleSaveModulo = (modulo: Modulo) => {
     setCurso((prevCurso) => {
       if (prevCurso) {
+        const updatedModuloList = modulo.idModulo
+          ? prevCurso.moduloList.map((m) => (m.idModulo === modulo.idModulo ? modulo : m))
+          : [...prevCurso.moduloList, { ...modulo, idModulo: String(Date.now()) }];
         return {
           ...prevCurso,
-          moduloList: [...prevCurso.moduloList, modulo],
+          moduloList: updatedModuloList,
+        };
+      }
+      return prevCurso;
+    });
+  };
+
+  const handleSaveProfesor = (profesor: Profesor) => {
+    setCurso((prevCurso) => {
+      if (prevCurso) {
+        return {
+          ...prevCurso,
+          professorDTOS: [...prevCurso.professorDTOS, profesor],
+        };
+      }
+      return prevCurso;
+    });
+  };
+
+  const handleSaveMiembro = (miembro: Miembro) => {
+    setCurso((prevCurso) => {
+      if (prevCurso) {
+        return {
+          ...prevCurso,
+          miembroDTOList: [...prevCurso.miembroDTOList, miembro],
         };
       }
       return prevCurso;
@@ -300,34 +333,14 @@ export default function CursoPage() {
         <EditProfesorModal
           cursoId={selectedCursoId}
           onClose={() => setEditProfesorModalOpen(false)}
-          onSave={(profesor: Profesor) => {
-            setCurso((prevCurso) => {
-              if (prevCurso) {
-                return {
-                  ...prevCurso,
-                  professorDTOS: [...prevCurso.professorDTOS, profesor],
-                };
-              }
-              return prevCurso;
-            });
-          }}
+          onSave={handleSaveProfesor}
         />
       )}
       {isEditMiembroModalOpen && (
         <EditMiembroModal
           cursoId={selectedCursoId}
           onClose={() => setEditMiembroModalOpen(false)}
-          onSave={(miembro: Miembro) => {
-            setCurso((prevCurso) => {
-              if (prevCurso) {
-                return {
-                  ...prevCurso,
-                  miembroDTOList: [...prevCurso.miembroDTOList, miembro],
-                };
-              }
-              return prevCurso;
-            });
-          }}
+          onSave={handleSaveMiembro}
         />
       )}
       {isEditModuloModalOpen && (

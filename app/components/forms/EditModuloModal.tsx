@@ -1,47 +1,41 @@
 import { API_URL } from '@/app/lib/config';
 import { useState } from 'react';
-
-interface Modulo {
-  numModulo: string;
-  descripcion: string;
-}
+import { Modulo } from "@/app/dashboard/list/subjects/types";
 
 interface EditModuloModalProps {
-  id: string;
+  cursoId: string;
   onClose: () => void;
   onSave: (modulo: Modulo) => void;
   modulo?: Modulo;
 }
 
-const EditModuloModal: React.FC<EditModuloModalProps> = ({ id, onClose, onSave, modulo }) => {
+const EditModuloModal: React.FC<EditModuloModalProps> = ({ cursoId, onClose, onSave, modulo }) => {
   const [numModulo, setNumModulo] = useState<string>(modulo?.numModulo || '');
   const [descripcion, setDescripcion] = useState<string>(modulo?.descripcion || '');
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleSaveModulo = async () => {
     setIsLoading(true);
-    const newModulo = { numModulo, descripcion };
-  
+    const newModulo: Modulo = { idModulo: modulo?.idModulo || '', numModulo, descripcion };
+
     try {
-      const response = await fetch(`${API_URL}modulo/create/${id}`, {
+      const response = await fetch(`${API_URL}modulo/create/${cursoId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(newModulo),
       });
-  
-      // Parse the response as JSON
+
       const data = await response.json();
-  
+
       if (!response.ok) {
         throw new Error(data.error || 'Error al guardar el módulo');
       }
-  
+
       alert(data.message || 'Módulo guardado con éxito');
-      onClose(); // Cerrar el modal
-      window.location.reload();
-      
+      onSave(newModulo);
+      onClose();
     } catch (err) {
       if (err instanceof Error) {
         alert(`Error: ${err.message}`);
@@ -52,7 +46,7 @@ const EditModuloModal: React.FC<EditModuloModalProps> = ({ id, onClose, onSave, 
       setIsLoading(false);
     }
   };
-  
+
   return (
     <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-lg w-96">
@@ -86,7 +80,7 @@ const EditModuloModal: React.FC<EditModuloModalProps> = ({ id, onClose, onSave, 
           </button>
           <button
             onClick={handleSaveModulo}
-            disabled={isLoading} // Deshabilitar el botón mientras se realiza la petición
+            disabled={isLoading}
             className={`px-4 py-2 rounded-md ${isLoading ? 'bg-gray-300' : 'bg-blue-500 text-white'} hover:bg-blue-600`}
           >
             {isLoading ? 'Guardando...' : 'Guardar'}
@@ -96,4 +90,5 @@ const EditModuloModal: React.FC<EditModuloModalProps> = ({ id, onClose, onSave, 
     </div>
   );
 };
+
 export default EditModuloModal;
