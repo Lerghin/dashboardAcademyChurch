@@ -1,15 +1,12 @@
-"use client";
-
 import { useState } from "react";
 import axios from "axios";
-import { useAuthStore } from "@/app/store/authStore";
 import { API_URL } from "@/app/lib/config";
 
 const RegisterPage = () => {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState(""); // Campo para confirmar la contraseña
-  const [errorMessage, setErrorMessage] = useState(null);
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null); // Update this line
   const [isLoading, setIsLoading] = useState(false);
 
   const handleRegister = async () => {
@@ -24,35 +21,17 @@ const RegisterPage = () => {
     }
 
     setIsLoading(true);
-    setErrorMessage(null);
-
     try {
-      const response = await axios.post(`${API_URL}auth/register`, {
+      const response = await axios.post(`${API_URL}/register`, {
         userName,
         password,
       });
-
-      const { token, user } = response.data;
-
-      // Guardar token y usuario en Zustand
-      useAuthStore.getState().setToken(token);
-
-      alert("Registro exitoso");
-      window.location.href = "/dashboard/admin"; // Redirigir al dashboard después del registro exitoso
+      // Handle successful registration
+      setIsLoading(false);
     } catch (error) {
-      if (error.response && error.response.status === 400) {
-        setErrorMessage("El usuario ya existe.");
-      } else {
-        setErrorMessage("Error al conectar con el servidor. Intenta nuevamente más tarde.");
-      }
-      console.error(error);
-    } finally {
+      setErrorMessage("Error al registrar. Por favor, inténtalo de nuevo.");
       setIsLoading(false);
     }
-  };
-
-  const handleGoBack = () => {
-    window.location.href = "/dashboard/admin"; // Redirigir al dashboard al hacer clic en "Atrás"
   };
 
   return (
