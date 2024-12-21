@@ -56,11 +56,10 @@ export default function SingleProfessorPage() {
   if (error) return <p>Error: {error}</p>;
   if (!data) return <p>Cargando...</p>;
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
-
   const handleCursosChange = (e, index) => {
     const newCursos = [...formData.cursos];
     newCursos[index] = e.target.value;
