@@ -84,7 +84,7 @@ export default function SingleProfessorPage() {
     setFormData((prev) => ({ ...prev, cursos: newCursos }));
   };
 
-  const handleFormSubmit = async (e) => {
+  const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       const response = await fetch(`${API_URL}profe/${id}`, {
@@ -93,7 +93,7 @@ export default function SingleProfessorPage() {
         body: JSON.stringify(formData),
       });
       if (!response.ok) throw new Error('Error al actualizar los datos');
-
+  
       // Actualiza el estado de los datos con los nuevos valores
       setData({
         ...data,
@@ -106,12 +106,16 @@ export default function SingleProfessorPage() {
         email: formData.email,
         cursos: formData.cursos,
       });
-
+  
       // Cierra el modal y muestra un mensaje de éxito
       alert('Datos actualizados exitosamente');
       setShowModal(false);
     } catch (err) {
-      alert(err.message);
+      if (err instanceof Error) {
+        alert(err.message);
+      } else {
+        alert('An unknown error occurred');
+      }
     }
   };
 
