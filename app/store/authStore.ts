@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, PersistStorage } from 'zustand/middleware';
 
 interface AuthState {
   token: string | null;
@@ -9,6 +9,19 @@ interface AuthState {
   logout: () => void;
   getToken: () => string | null; // Agregar un getter para el token
 }
+
+const localStoragePersist: PersistStorage<AuthState> = {
+  getItem: (name) => {
+    const item = localStorage.getItem(name);
+    return item ? JSON.parse(item) : null;
+  },
+  setItem: (name, value) => {
+    localStorage.setItem(name, JSON.stringify(value));
+  },
+  removeItem: (name) => {
+    localStorage.removeItem(name);
+  },
+};
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -28,7 +41,7 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'auth-token-storage', // Nombre clave para localStorage
-      getStorage: () => localStorage,
+      storage: localStoragePersist,
     }
   )
 );
