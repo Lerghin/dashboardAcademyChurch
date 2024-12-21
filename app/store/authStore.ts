@@ -5,6 +5,7 @@ interface AuthState {
   token: string | null;
   isTokenReady: boolean; // Nuevo estado para saber si el token ya se cargó
   setToken: (token: string | null) => void;
+  login: (token: string) => void;
   logout: () => void;
   getToken: () => string | null; // Agregar un getter para el token
 }
@@ -14,9 +15,8 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       token: null,
       isTokenReady: false, // Estado para manejar la preparación del token
-      setToken: (token) => {
-        set({ token, isTokenReady: true }); // Establecer el token y marcar el estado listo
-      },
+      setToken: (token: string | null) => set({ token, isTokenReady: true }),
+      login: (token: string) => set({ token, isTokenReady: true }),
       logout: () => {
         set({ token: null, isTokenReady: false }); // Limpiar el token
         localStorage.removeItem('auth-token-storage'); // Eliminar token del localStorage
