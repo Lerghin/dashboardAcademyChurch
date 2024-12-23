@@ -1,7 +1,7 @@
 'use client'
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { API_URL } from "@/app/lib/config";
+import { API_URL, getData, putData } from "@/app/lib/config";
 
 // Define la estructura de un evento
 interface Event {
@@ -25,12 +25,10 @@ export default function EventDetail() {
 
   useEffect(() => {
     if (!id) return;
-
+  
     const fetchData = async () => {
       try {
-        const response = await fetch(`${API_URL}events/get/${id}`, { cache: "no-store" });
-        if (!response.ok) throw new Error("Error en la solicitud");
-        const result: Event = await response.json();
+        const result: Event = await getData(`events/get/${id}`);
         setFormData(result);
         setEvent(result);
       } catch (err) {
@@ -41,6 +39,7 @@ export default function EventDetail() {
         }
       }
     };
+  
     fetchData();
   }, [id]);
 
@@ -55,15 +54,16 @@ export default function EventDetail() {
   const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const response = await fetch(`${API_URL}events/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-      if (!response.ok) throw new Error("Error al guardar los cambios");
-
-      const updatedEvent = await response.json();
-      setEvent(updatedEvent);
+      const updatedEvent = {
+        // Aquí debes incluir los datos del evento que deseas actualizar
+        nameEvents: formData.nameEvents,
+        fecha_inicio: formData.fecha_inicio,
+        description: formData.description,
+        // Otros campos que necesites actualizar
+      };
+  
+      const response = await putData(`events/${id}`, updatedEvent);
+      setEvent(response);
       setIsEditing(false);
     } catch (err) {
       console.error(err);

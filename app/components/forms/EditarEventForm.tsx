@@ -1,6 +1,6 @@
 'use client'
 
-import { API_URL } from '@/app/lib/config';
+import { API_URL, postData, putData } from '@/app/lib/config';
 import { useState } from 'react';
 
 interface Event {
@@ -21,6 +21,7 @@ const EditEventModal: React.FC<EditEventModalProps> = ({ onClose, onSave, event 
   const [fecha_inicio, setFechaInicio] = useState<string>(event?.fecha_inicio || '');
   const [description, setDescription] = useState<string>(event?.description || '');
 
+ 
   const handleSubmit = async () => {
     const newEvent: Event = { nameEvents, fecha_inicio, description };
     if (event?.idEvents) {
@@ -28,22 +29,10 @@ const EditEventModal: React.FC<EditEventModalProps> = ({ onClose, onSave, event 
     }
 
     try {
-      const url = event?.idEvents
-        ? `${API_URL}events/${event.idEvents}` // Endpoint para editar
-        : `${API_URL}events`; // Endpoint para crear
-      const method = event?.idEvents ? 'PUT' : 'POST';
+      const savedEvent = event?.idEvents
+        ? await putData(`events/${event.idEvents}`, newEvent) // Endpoint para editar
+        : await postData('events', newEvent); // Endpoint para crear
 
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newEvent),
-      });
-
-      if (!response.ok) {
-        throw new Error('Error al guardar el evento');
-      }
-
-      const savedEvent = await response.json();
       onSave(savedEvent);
       onClose();
     } catch (err) {

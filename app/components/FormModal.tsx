@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useState } from "react";
-import { API_URL } from "../lib/config";
+import { API_URL, deleteData, postData, putData } from "../lib/config";
 import EditEventModal from "./forms/EditEventModalProps";
 
 
@@ -79,27 +79,47 @@ const FormModal = ({
       : "bg-lamaPurple";
 
   const [open, setOpen] = useState(false);
+  const [getEventPayload, setGetEventPayload] = useState<() => any>(() => () => ({}));
+
 
   // Maneja la eliminación de un registro
   const handleDelete = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault(); // Prevenir comportamiento predeterminado
     try {
-      const response = await fetch(`${API_URL}${table}/delete/${id}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        throw new Error("Error al eliminar el registro.");
-      }
-
-      console.log("Eliminación exitosa");
-      setOpen(false); // Cierra el modal tras la eliminación
+      const response = await deleteData(`${table}/delete/${id}`);
+      const data= response;
+      alert("Eliminado correctamente");
+      window.location.reload();
+      
+      setOpen(false);
+      // Cierra el modal tras la eliminación
       // Aquí podrías actualizar el estado local para eliminar el elemento sin recargar
     } catch (err: any) {
       console.error("Error:", err.message || err);
     }
   };
 
+
+    // Maneja la creación o actualización de un registro
+    const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      try {
+        const newData = {
+  
+          ...data,
+        };
+        console.log(newData);
+        const response = type === "update"
+          ? await putData(`${table}/${id}`, newData)
+          : await postData(`${table}/create`, newData);
+       
+   
+        setOpen(false); // Cierra el modal tras la operación
+        // Aquí podrías actualizar el estado local para reflejar los cambios sin recargar
+      } catch (err: any) {
+        console.error("Error:", err.message || err);
+      }
+    };
   // Verifica si la tabla es válida antes de mostrar el formulario
   const Form = () => {
     const validTables: TableType[] = [
@@ -115,23 +135,37 @@ const FormModal = ({
       return <div>Form not found!</div>;
     }
 
-    return type === "delete" && id ? (
-      <form action="" className="p-4 flex flex-col gap-4">
-        <span className="text-center font-medium">
-          ¿Está seguro de borrar {table}?
-        </span>
-        <button
-          className="bg-red-700 text-white py-2 px-4 rounded-md border-none w-max self-center"
-          onClick={handleDelete}
-        >
-          Delete
-        </button>
-      </form>
-    ) : type === "create" || type === "update" ? (
-      forms[table as TableType](type, data)
-    ) : (
-      "Form not found!"
-    );
+    if (type === "delete" && id) {
+      return (
+        <form action="" className="p-4 flex flex-col gap-4">
+          <span className="text-center font-medium">
+            ¿Está seguro de borrar {table}?
+          </span>
+          <button
+            className="bg-red-700 text-white py-2 px-4 rounded-md border-none w-max self-center"
+            onClick={handleDelete}
+          >
+            Delete
+          </button>
+        </form>
+      );
+    }
+
+    if (type === "create" || type === "update") {
+      return (
+        <form onSubmit={handleSave} className="p-4 flex flex-col gap-4">
+          {forms[table as TableType](type, data)}
+          <button
+            type="submit"
+            className="bg-blue-500 text-white py-2 px-4 rounded-md border-none w-max self-center"
+          >
+            {type === "create" ? "Crear" : "Actualizar"}
+          </button>
+        </form>
+      );
+    }
+
+    return <div>Form not found!</div>;
   };
 
   return (

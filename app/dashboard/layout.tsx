@@ -1,3 +1,5 @@
+
+'use client'
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./../ui/global.css";
@@ -5,16 +7,14 @@ import Link from "next/link";
 import Image from "next/image";
 import Menu from "../components/Menu";
 import Navbar from "../components/Navbar";
+import AuthProvider from "../store/AuthProvider";
 
 
 
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata = {
-  title: "Academia Nuevo Nacimiento",
-  description: "Next.js School Management System",
-};
+
 
 export default function DashboardLayout({
   children,
@@ -37,8 +37,13 @@ export default function DashboardLayout({
 
       <div className="w-[86%] md:w-[92%] lg:w-[84%] xl:w-[86%] bg-[#6495ED] overflow-scroll flex flex-col ">
         
+       
+        <AuthProvider>
         <Navbar/>
-         {children}
+        {children}
+
+        </AuthProvider>
+   
        
         </div>
 

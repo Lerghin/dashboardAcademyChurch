@@ -41,6 +41,7 @@ const CreateEventModal: React.FC<FormModalProps> = ({ table, type, onClose, onSa
 
   const handleSubmit = async () => {
     const eventPayload = { nameEvents, description, fecha_inicio };
+   
   
     try {
       let response;
@@ -57,6 +58,7 @@ const CreateEventModal: React.FC<FormModalProps> = ({ table, type, onClose, onSa
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(eventPayload),
         });
+
       }
   
       if (!response.ok) {
@@ -75,8 +77,7 @@ const CreateEventModal: React.FC<FormModalProps> = ({ table, type, onClose, onSa
       }
     }
   };
-  
-
+   
   return (
     <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-lg w-96">

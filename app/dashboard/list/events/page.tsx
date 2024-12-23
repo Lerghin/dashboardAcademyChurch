@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import FormModal from "@/app/components/FormModal";
 import Pagination from "@/app/components/Pagination";
 import Table from "@/app/components/Table";
-import { API_URL } from "@/app/lib/config";
+import { API_URL, getData } from "@/app/lib/config";
 import { role } from "@/app/lib/data";
 import Image from "next/image";
 import Link from "next/link";
@@ -47,7 +47,7 @@ const EventListPage = () => {
   const [searchDate, setSearchDate] = useState(""); // Captura la búsqueda por fecha
   
   const token = useAuthStore((state) => state.getToken()); // Obtener el token usando getToken
-  // Inicializa el enrutador para redirigir si no hay token
+ 
 
  
    useEffect(() => {
@@ -56,51 +56,39 @@ const EventListPage = () => {
      }
    }, [token]); // Ejecuta el efecto cada vez que el token cambie
 
-
-  const eventsPerPage = 10;
-
-  // Obtener los eventos cuando el componente se monta
-// Obtener los eventos cuando el componente se monta
-useEffect(() => {
   const fetchEvents = async () => {
-    const response = await fetch(`${API_URL}events/get`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`, // Incluye el token en los encabezados
-      },
-      cache: 'no-store',
-    });
-
-    if (!response.ok) {
-      throw new Error('Error al obtener los eventos');
+    try {
+      const data = await getData('events/get');
+      console.log(data);
+      setEventsData(data);
+    } catch (error) {
+      console.error('Error fetching events:', error);
     }
-
-    const data: Event[] = await response.json();
-    setEventsData(data);
   };
 
-  if (token) {
+  useEffect(() => {
     fetchEvents();
-  }
-}, [token]);
+  }, [token, currentPage, searchName, searchDate]); // Ejecuta el efecto cuando cambien estos valores
+
+  const eventsPerPage = 10;
 
   // Calcular el rango de eventos a mostrar en base a la página actual
   const indexOfLastEvent = currentPage * eventsPerPage;
   const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
-
+  
   // Función para filtrar los datos
   const filteredEvents = eventsData.filter((event) => {
-    const matchesName = event.nameEvents.toLowerCase().includes(searchName.toLowerCase());
+    const matchesName = event.nameEvents?.toLowerCase().includes(searchName.toLowerCase()) ?? false;
     const matchesDate = searchDate
       ? event.fecha_inicio.startsWith(searchDate) // Filtrar por fecha de inicio
       : true;
     return matchesName && matchesDate;
   });
-
+  
   const currentEvents = filteredEvents.slice(indexOfFirstEvent, indexOfLastEvent);
-
+  
   const totalPages = Math.ceil(filteredEvents.length / eventsPerPage);
+  
 
   const renderRow = (item: Event) => (
     <tr
