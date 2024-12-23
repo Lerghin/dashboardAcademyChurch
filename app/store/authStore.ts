@@ -29,7 +29,10 @@ export const useAuthStore = create<AuthState>()(
       token: null,
       isTokenReady: false, // Estado para manejar la preparación del token
       setToken: (token: string | null) => set({ token, isTokenReady: true }),
-      login: (token: string) => set({ token, isTokenReady: true }),
+      login: (token: string) => {
+        set({ token, isTokenReady: true });
+        localStorage.setItem('auth-token-storage', JSON.stringify({ state: { token, isTokenReady: true }, version: 0 }));
+      },
       logout: () => {
         set({ token: null, isTokenReady: false }); // Limpiar el token
         localStorage.removeItem('auth-token-storage'); // Eliminar token del localStorage
