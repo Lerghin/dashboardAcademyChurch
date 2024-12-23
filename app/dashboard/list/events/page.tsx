@@ -48,6 +48,7 @@ const EventListPage = () => {
   
   const token = useAuthStore((state) => state.getToken()); // Obtener el token usando getToken
   // Inicializa el enrutador para redirigir si no hay token
+
  
    useEffect(() => {
      if (!token) {
@@ -59,15 +60,30 @@ const EventListPage = () => {
   const eventsPerPage = 10;
 
   // Obtener los eventos cuando el componente se monta
-  useEffect(() => {
-    const fetchEvents = async () => {
-      const response = await fetch(`${API_URL}events/get`, { cache: "no-store" });
-      const data: Event[] = await response.json();
-      setEventsData(data);
-    };
+// Obtener los eventos cuando el componente se monta
+useEffect(() => {
+  const fetchEvents = async () => {
+    const response = await fetch(`${API_URL}events/get`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`, // Incluye el token en los encabezados
+      },
+      cache: 'no-store',
+    });
 
+    if (!response.ok) {
+      throw new Error('Error al obtener los eventos');
+    }
+
+    const data: Event[] = await response.json();
+    setEventsData(data);
+  };
+
+  if (token) {
     fetchEvents();
-  }, []);
+  }
+}, [token]);
 
   // Calcular el rango de eventos a mostrar en base a la página actual
   const indexOfLastEvent = currentPage * eventsPerPage;
