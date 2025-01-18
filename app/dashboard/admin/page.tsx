@@ -27,11 +27,21 @@ const AdminPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`${API_URL}miembro/get/number`, { cache: "no-store" });
+        const response = await fetch(`${API_URL}miembro/get/number`, {
+          cache: "no-store",
+          headers: {
+            Authorization: `Bearer ${token}`, // Add token to headers
+          },
+        });
         const miembroResult = await response.json();
         setMiembroData(miembroResult);
 
-        const responseProf = await fetch(`${API_URL}profe/get/number`, { cache: "no-store" });
+        const responseProf = await fetch(`${API_URL}profe/get/number`, {
+          cache: "no-store",
+          headers: {
+            Authorization: `Bearer ${token}`, // Add token to headers
+          },
+        });
         const profResult = await responseProf.json();
         setProfData(profResult);
       } catch (error) {
