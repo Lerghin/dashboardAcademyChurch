@@ -19,21 +19,22 @@ const LoginPage = () => {
     }
 
     setIsLoading(true);
+    setErrorMessage(null); // Reinicia el mensaje de error
 
     try {
-      console.log("Sending login request to:", `${API_URL}auth/login`);
       const response = await axios.post(`${API_URL}auth/login`, {
         username,
         password,
       });
-      console.log("Login response:", response.data);
+
       const { token } = response.data;
-      setToken(token); // Save the token in Zustand store
+      setToken(token); // Guarda el token en el store
       window.location.href = "/dashboard/admin";
-      setIsLoading(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login error:", error);
-      setErrorMessage("Error al iniciar sesión. Por favor, inténtalo de nuevo.");
+      const backendMessage = error.response?.data?.message || "Error al iniciar sesión. Por favor, inténtalo de nuevo.";
+      setErrorMessage(backendMessage);
+    } finally {
       setIsLoading(false);
     }
   };
@@ -158,6 +159,7 @@ const LoginPage = () => {
               type="text"
               id="username"
               placeholder="Ingresa tu usuario"
+              aria-label="Usuario"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="form-input"
@@ -173,6 +175,7 @@ const LoginPage = () => {
               type="password"
               id="password"
               placeholder="Ingresa tu contraseña"
+              aria-label="Contraseña"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="form-input"
