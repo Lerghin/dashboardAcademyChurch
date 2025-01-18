@@ -3,8 +3,7 @@ import { useAuthStore } from '../store/authStore';
 export const API_URL = "https://iglesiaproyecto.onrender.com/";
 
 export const getAuthHeaders = () => {
-  const token = useAuthStore.getState().getToken(); 
-  console.log(token)// Obtener el token usando getToken
+  const token = useAuthStore.getState().getToken(); // Obtener el token usando getToken
   return {
     Authorization: `Bearer ${token}`,
     'Content-Type': 'application/json',

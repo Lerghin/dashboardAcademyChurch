@@ -5,7 +5,7 @@ import CountChart from "@/app/components/CountChart";
 import EventCalendar from "@/app/components/EventCalendar";
 import FinanceChart from "@/app/components/FinanceChart";
 import UseCard from "@/app/components/UseCard";
-import { API_URL } from "@/app/lib/config";
+import { getData } from "@/app/lib/config";
 import { useAuthStore } from "@/app/store/authStore";
 import withAuth from "@/app/store/withAuth";
 import { FC, useEffect, useState } from "react";
@@ -27,22 +27,10 @@ const AdminPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`${API_URL}miembro/get/number`, {
-          cache: "no-store",
-          headers: {
-            Authorization: `Bearer ${token}`, // Add token to headers
-          },
-        });
-        const miembroResult = await response.json();
+        const miembroResult = await getData('miembro/get/number');
         setMiembroData(miembroResult);
 
-        const responseProf = await fetch(`${API_URL}profe/get/number`, {
-          cache: "no-store",
-          headers: {
-            Authorization: `Bearer ${token}`, // Add token to headers
-          },
-        });
-        const profResult = await responseProf.json();
+        const profResult = await getData('profe/get/number');
         setProfData(profResult);
       } catch (error) {
         console.error("Error fetching data:", error);

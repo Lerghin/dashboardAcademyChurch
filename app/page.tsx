@@ -6,14 +6,14 @@ import { useAuthStore } from "@/app/store/authStore";
 import { API_URL } from "@/app/lib/config";
 
 const LoginPage = () => {
-  const [userName, setUserName] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const setToken = useAuthStore((state) => state.setToken);
 
   const handleLogin = async () => {
-    if (!userName || !password) {
+    if (!username || !password) {
       setErrorMessage("Por favor, completa todos los campos.");
       return;
     }
@@ -23,7 +23,7 @@ const LoginPage = () => {
     try {
       console.log("Sending login request to:", `${API_URL}auth/login`);
       const response = await axios.post(`${API_URL}auth/login`, {
-        userName,
+        username,
         password,
       });
       console.log("Login response:", response.data);
@@ -158,8 +158,8 @@ const LoginPage = () => {
               type="text"
               id="username"
               placeholder="Ingresa tu usuario"
-              value={userName}
-              onChange={(e) => setUserName(e.target.value)}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               className="form-input"
             />
           </div>
