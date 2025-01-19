@@ -10,6 +10,7 @@ const Navbar = () => {
     const [loading, setLoading] = useState(true); // Estado de carga
     const [error, setError] = useState<string | null>(null); // Estado de error, ahora con tipo string | null
     const token = useAuthStore((state) => state.token);
+    //console.log(token)
     const isTokenReady = useAuthStore((state) => state.isTokenReady);
 
     useEffect(() => {
