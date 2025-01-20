@@ -217,12 +217,12 @@ const PagoListPage = () => {
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
       {/* FORMULARIO DE FILTRO */}
       <div className="mb-4 p-2 bg-gray-50 rounded-md">
-        <div className="flex gap-2 md:gap-4">
+        <div className="flex flex-col gap-2 md:flex-row md:gap-4">
           <input
             name="fecha_pago"
             type="date"
             placeholder="Fecha de Pago"
-            className="border p-2 rounded"
+            className="border p-2 rounded w-full md:w-auto"
             value={filters.fecha_pago}
             onChange={handleFilterChange}
           />
@@ -230,7 +230,7 @@ const PagoListPage = () => {
             name="monto"
             type="number"
             placeholder="Monto"
-            className="border p-2 rounded"
+            className="border p-2 rounded w-full md:w-auto"
             value={filters.monto}
             onChange={handleFilterChange}
           />
@@ -238,7 +238,7 @@ const PagoListPage = () => {
             name="referencia"
             type="text"
             placeholder="Referencia"
-            className="border p-2 rounded"
+            className="border p-2 rounded w-full md:w-auto"
             value={filters.referencia}
             onChange={handleFilterChange}
           />
@@ -246,14 +246,14 @@ const PagoListPage = () => {
             name="cedula"
             type="text"
             placeholder="Cédula"
-            className="border p-2 rounded"
+            className="border p-2 rounded w-full md:w-auto"
             value={filters.cedula}
             onChange={handleFilterChange}
           />
            {role === "admin" && (
             <button
               onClick={() => setIsModalOpen(true)}
-              className="bg-lamaSky text-white p-2 rounded-md"
+              className="bg-lamaSky text-white p-2 rounded-md w-full md:w-auto"
             >
               Agregar Pago 
             </button>
