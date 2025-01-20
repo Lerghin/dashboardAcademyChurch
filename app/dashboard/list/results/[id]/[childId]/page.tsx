@@ -165,8 +165,7 @@ const NotesPage = () => {
         location.reload();
       } else {
         const errorData = await response.json();
-        const errorMessage = errorData.message || response.statusText;
-        alert(`Error: ${errorMessage}`);
+    
       }
     } else {
       // Crear nueva nota
@@ -185,9 +184,9 @@ const NotesPage = () => {
         handleCloseModal();
         location.reload();
       } else {
-        const errorData = await response.json();
-        const errorMessage = errorData.message || response.statusText;
-        alert(`Error: ${errorMessage}`);
+        window.location.reload()
+        
+       
       }
     }
   };
