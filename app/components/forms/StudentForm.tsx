@@ -20,9 +20,10 @@ interface StudentFormProps {
     nuevoCurso: string;
     nuevoNivel: string;
   }; // Ajusta el tipo según la estructura de tus datos
+  closeModal: () => void; // Función para cerrar el modal
 }
 
-const StudentForm: React.FC<StudentFormProps> = ({ type, data }) => {
+const StudentForm: React.FC<StudentFormProps> = ({ type, data, closeModal }) => {
   const [formData, setFormData] = useState(data || {
     cedula: '',
     nombre: '',
@@ -111,8 +112,8 @@ const StudentForm: React.FC<StudentFormProps> = ({ type, data }) => {
   };
 
   return (
-    <div className="w-full">
-      <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden w-full">
+    <div className="w-screen h-screen absolute left-0 top-0 bg-black bg-opacity-60 z-50 flex items-center justify-center">
+      <div className="bg-white p-4 rounded-md relative w-[90%] md:w-[70%] lg:w-[60%] xl:w-[50%] 2xl:w-[40%] flex flex-wrap">
         <div className="p-6 md:p-8">
           <h2 className="text-2xl font-semibold mb-4 text-blue-700">{type === 'edit' ? 'Editar Miembro' : 'Crear Nuevo Miembro'}</h2>
 
@@ -211,13 +212,13 @@ const StudentForm: React.FC<StudentFormProps> = ({ type, data }) => {
               {/* Sección de cursos realizados */}
               <div className="col-span-2">
                 <h3 className="text-lg font-semibold text-blue-700 mb-2">Cursos Realizados</h3>
-                <div className="flex gap-4">
+                <div className="flex flex-wrap gap-4">
                   <input
                     type="text"
                     name="nuevoCurso"
                     value={formData.nuevoCurso}
                     onChange={handleInputChange}
-                    className="p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="p-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Nuevo Curso"
                   />
                   <input
@@ -271,6 +272,14 @@ const StudentForm: React.FC<StudentFormProps> = ({ type, data }) => {
                 >
                   {type === 'edit' ? 'Actualizar Miembro' : 'Crear Miembro'}
                 </button>
+                  {/* Botón de Cancelar */}
+              <button
+                type="button"
+                onClick={closeModal} // Llamada a la función para cerrar el modal
+                className="px-6 py-2 bg-red-500 text-white rounded-md"
+              >
+                Cancelar
+              </button>
               </div>
             </div>
           </form>

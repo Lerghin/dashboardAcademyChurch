@@ -1,6 +1,6 @@
-'use client';
+'use client'
 import { useState, useEffect } from "react";
-import FormModal from "@/app/components/FormModal";
+import FormModal from "@/app/components/FormModal"; // Componente para el formulario de estudiantes
 import Pagination from "@/app/components/Pagination";
 import Table from "@/app/components/Table";
 import TableSearch from "@/app/components/TableSearch";
@@ -9,8 +9,8 @@ import { role } from "@/app/lib/data";
 import Image from "next/image";
 import Link from "next/link";
 import { useAuthStore } from "@/app/store/authStore";
+import StudentForm from "@/app/components/forms/StudentForm";
 
-// Define el tipo para la estructura de datos.
 type Student = {
   idMiembro: string;
   nombre: string;
@@ -35,31 +35,35 @@ const columns = [
 
 const StudentListPage = () => {
   const [studentsData, setStudentsData] = useState<Student[]>([]);
-  const [filteredStudents, setFilteredStudents] = useState<Student[]>([]); // Estado para los datos filtrados
+  const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5; // Cantidad de elementos por página
-  const [searchTerm, setSearchTerm] = useState(""); // Término de búsqueda
+  const itemsPerPage = 5;
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false); // Estado del modal para crear estudiante
 
-  const token = useAuthStore((state) => state.getToken()); // Obtener el token usando getToken
- // Inicializa el enrutador para redirigir si no hay token
+
+const closeModal = () => {
+  setIsModalOpen(false);
+};
+
+  const token = useAuthStore((state) => state.getToken());
 
   useEffect(() => {
     if (!token) {
-      window.location.href = "/"; // Redirige a la página de login si no hay token
+      window.location.href = "/";
     }
-  }, [token]); // Ejecuta el efecto cada vez que el token cambie
-  // Simulación de datos cargados desde la API.
+  }, [token]);
+
   useEffect(() => {
     const fetchData = async () => {
       const response = await fetch(`${API_URL}miembro/get`, { cache: "no-store" });
       const data: Student[] = await response.json();
       setStudentsData(data);
-      setFilteredStudents(data); // Establecer los datos por defecto al inicio
+      setFilteredStudents(data); // Establecer los datos por defecto
     };
     fetchData();
   }, []);
 
-  // Actualizar el filtro basado en el término de búsqueda
   useEffect(() => {
     const filtered = studentsData.filter((student) =>
       student.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -67,15 +71,13 @@ const StudentListPage = () => {
       student.cedula.includes(searchTerm)
     );
     setFilteredStudents(filtered);
-    setCurrentPage(1); // Resetear la página al buscar
+    setCurrentPage(1);
   }, [searchTerm, studentsData]);
 
-  // Calcular el subconjunto de datos de la página actual.
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentStudents = filteredStudents.slice(indexOfFirstItem, indexOfLastItem);
 
-  // Cambiar la página.
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
@@ -106,46 +108,84 @@ const StudentListPage = () => {
             </button>
           </Link>
           {role === "admin" && (
-            <FormModal table="miembro" type="delete" id={item.idMiembro} />
+            <button
+              onClick={() => handleDelete(item.idMiembro)}
+              className="w-7 h-7 flex items-center justify-center rounded-full bg-red-500"
+            >
+              <Image src="/delete.png" alt="Eliminar" width={16} height={16} />
+            </button>
           )}
         </div>
       </td>
     </tr>
   );
 
+  const handleDelete = (idMiembro: string) => {
+    const confirmed = window.confirm("¿Estás seguro de que deseas eliminar este miembro?");
+    if (confirmed) {
+      fetch(`${API_URL}miembro/delete/${idMiembro}`, { method: "DELETE" })
+        .then((response) => response.text())
+        .then(() => {
+          alert("Miembro eliminado exitosamente");
+          setStudentsData((prevData) => prevData.filter((student) => student.idMiembro !== idMiembro));
+          setFilteredStudents((prevData) => prevData.filter((student) => student.idMiembro !== idMiembro));
+        })
+        .catch((error) => {
+          console.error("Error al eliminar el miembro", error);
+          alert("Hubo un error al eliminar el miembro");
+        });
+    } else {
+      alert("Eliminación cancelada");
+    }
+  };
+
   return (
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
-      {/* TOP */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-4">
         <h1 className="hidden md:block text-lg font-semibold">Todos los Miembros</h1>
-        <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
-          {/* Campo de búsqueda */}
-          <div className="flex items-center gap-2">
-            <input
-              type="text"
-              placeholder="Buscar por nombre, apellido o cédula"
-              className="border px-3 py-1 rounded-md"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)} // Actualizar el término de búsqueda
-            />
-          </div>
-          <div className="flex items-center gap-4 self-end">
-            {role === "admin" && (
-              <FormModal table="student" type="create" />
-            )}
-          </div>
+        <div className="flex items-center gap-4">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="border p-2 rounded-md"
+            placeholder="Buscar por nombre, apellido o cédula"
+          />
+          {role === "admin" && (
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="bg-lamaSky text-white p-2 rounded-md"
+            >
+              Agregar Miembro
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Tabla de datos dinámicos */}
       <Table columns={columns} renderRow={renderRow} data={currentStudents} />
 
-      {/* PAGINACIÓN */}
       <Pagination
         totalPages={totalPages}
         currentPage={currentPage}
         onPageChange={handlePageChange}
       />
+
+      {isModalOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+          onClick={() => setIsModalOpen(false)}
+        >
+          <div className="bg-white p-6 rounded-md w-96" onClick={(e) => e.stopPropagation()}>
+           <StudentForm type={"create"}   closeModal={closeModal} />
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="mt-4 w-full py-2 bg-red-500 text-white rounded-md"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
