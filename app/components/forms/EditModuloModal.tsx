@@ -27,13 +27,13 @@ const EditModuloModal: React.FC<EditModuloModalProps> = ({ cursoId, onClose, onS
         body: JSON.stringify(newModulo),
       });
 
-      const data = await response.json();
+      const data = await response.text();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Error al guardar el módulo');
+        throw new Error( 'Error al guardar el módulo');
       }
 
-      alert(data.message || 'Módulo guardado con éxito');
+      alert('Módulo guardado con éxito');
       onSave(newModulo);
       onClose();
     } catch (err) {

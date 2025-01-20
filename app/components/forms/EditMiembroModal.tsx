@@ -1,6 +1,7 @@
 // EditMiembroModal.tsx
 import { API_URL } from '@/app/lib/config';
-import { useState } from 'react';
+import { useParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 interface Miembro {
   nombre: string;
@@ -19,10 +20,24 @@ const EditMiembroModal: React.FC<EditMiembroModalProps> = ({ cursoId, onClose, o
   const [nombre, setNombre] = useState<string>(miembro?.nombre || '');
   const [apellido, setApellido] = useState<string>(miembro?.apellido || '');
   const [cedula, setCedula] = useState<string>(miembro?.cedula || '');
+  const [studentsData, setStudentsData] = useState<Miembro[]>([]);
+  const [filteredStudents, setFilteredStudents] = useState<Miembro[]>([]);
+  const { id } = useParams() as { id: string };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await fetch(`${API_URL}miembro/get`, { cache: "no-store" });
+      const data: Miembro[] = await response.json();
+      setStudentsData(data);
+      setFilteredStudents(data); // Establecer los datos por defecto
+    };
+    fetchData();
+  }, []);
+
   const handleSubmit = async () => {
-    const newMember = { nombre, apellido, cedula, cursoId }; // Incluye cursoId en el objeto
+    const newMember = { nombre, apellido, cedula, id }; // Incluye cursoId en el objeto
     try {
-      const response = await fetch(`${API_URL}curso/add-member/${cursoId}/${cedula}`, {
+      const response = await fetch(`${API_URL}curso/add-member/${id}/${cedula}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newMember),
@@ -73,12 +88,25 @@ const EditMiembroModal: React.FC<EditMiembroModalProps> = ({ cursoId, onClose, o
 
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700">Cédula</label>
-          <input
-            type="text"
+          <select
             value={cedula}
-            onChange={(e) => setCedula(e.target.value)}
+            onChange={(e) => {
+              const selectedMember = studentsData.find(student => student.cedula === e.target.value);
+              if (selectedMember) {
+                setNombre(selectedMember.nombre);
+                setApellido(selectedMember.apellido);
+                setCedula(selectedMember.cedula);
+              }
+            }}
             className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md"
-          />
+          >
+            <option value="">Seleccione un miembro</option>
+            {filteredStudents.map((student) => (
+              <option key={student.cedula} value={student.cedula}>
+                {student.nombre} {student.apellido} - {student.cedula}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="flex justify-between">

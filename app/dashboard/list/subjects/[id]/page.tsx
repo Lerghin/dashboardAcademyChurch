@@ -176,13 +176,13 @@ export default function CursoPage() {
         }
       );
 
-      const data = await response.json();
+      const data = await response.text();
 
       if (!response.ok) {
-        throw new Error(data.error || "Error al eliminar módulo");
+        throw new Error("Error al eliminar módulo");
       }
 
-      alert(data.message || "Módulo eliminado con éxito");
+      alert("Módulo eliminado con éxito");
 
       window.location.reload();
     } catch (err) {

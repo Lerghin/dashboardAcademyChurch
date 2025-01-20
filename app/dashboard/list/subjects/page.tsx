@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import FormModal from "@/app/components/FormModal";
+
 import Pagination from "@/app/components/Pagination";
 import Table from "@/app/components/Table";
 import { API_URL } from "@/app/lib/config";
@@ -9,6 +9,8 @@ import { role } from "@/app/lib/data";
 import Image from "next/image";
 import Link from "next/link";
 import { useAuthStore } from "@/app/store/authStore";
+import CreateCoursePage from "@/app/components/forms/FormCrearCurso";
+
 
 type ProfessorDTO = {
   id: string;
@@ -54,14 +56,16 @@ const ResultListPage = () => {
   const [subjectsData, setSubjectsData] = useState<Subject[]>([]);
   const [filteredSubjects, setFilteredSubjects] = useState<Subject[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [isModalOpen, setIsModalOpen] = useState(false); // Estado para el modal
   const token = useAuthStore((state) => state.getToken()); // Obtener el token usando getToken
+
   // Inicializa el enrutador para redirigir si no hay token
- 
-   useEffect(() => {
-     if (!token) {
-       window.location.href = "/"; // Redirige a la página de login si no hay token
-     }
-   }, [token]); // Ejecuta el efecto cada vez que el token cambie
+
+  useEffect(() => {
+    if (!token) {
+      window.location.href = "/"; // Redirige a la página de login si no hay token
+    }
+  }, [token]); // Ejecuta el efecto cada vez que el token cambie
   // Número de cursos por página
   const subjectsPerPage = 10;
 
@@ -83,6 +87,30 @@ const ResultListPage = () => {
 
     fetchSubjects();
   }, []);
+
+  const handleDelete = (idProfessor: string) => {
+    const confirmed = window.confirm(
+      "¿Estás seguro de que deseas eliminar este Curso?"
+    );
+    if (confirmed) {
+      // Lógica para eliminar el profesor
+      alert("Profesor eliminado");
+      // Recargar la página actual
+      window.location.reload();
+      fetch(`${API_URL}curso/delete/${idProfessor}`, { method: "DELETE" })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            alert("Curso eliminado exitosamente");
+          }
+        })
+        .catch((error) =>
+          console.error("Error al eliminar el Curso ", error)
+        );
+    } else {
+      alert("Eliminación cancelada");
+    }
+  };
 
   // Filtrar datos según los criterios seleccionados
   const handleFilter = () => {
@@ -151,9 +179,12 @@ const ResultListPage = () => {
               <Image src="/view.png" alt="" width={16} height={16} />
             </button>
           </Link>
-          {role === "admin" && (
-            <FormModal table="curso" type="delete" id={item.idCurso} />
-          )}
+          <button
+            onClick={() => handleDelete(item.idCurso)}
+            className="w-7 h-7 flex items-center justify-center rounded-full bg-red-500"
+          >
+            <Image src="/delete.png" alt="Eliminar" width={16} height={16} />
+          </button>
         </div>
       </td>
     </tr>
@@ -167,37 +198,41 @@ const ResultListPage = () => {
           Todos los Cursos
         </h1>
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
-          <div className="flex gap-2">
+          <div className="flex flex-col md:flex-row gap-2 w-full">
             <input
               type="text"
               placeholder="Buscar por nombre..."
               value={nombreCurso}
               onChange={(e) => setNombreCurso(e.target.value)}
-              className="border px-2 py-1 rounded-md"
+              className="border px-2 py-1 rounded-md w-full md:w-auto"
             />
             <input
               type="date"
               value={fechaInicio}
               onChange={(e) => setFechaInicio(e.target.value)}
-              className="border px-2 py-1 rounded-md"
+              className="border px-2 py-1 rounded-md w-full md:w-auto"
             />
             <input
               type="date"
               value={fechaFin}
               onChange={(e) => setFechaFin(e.target.value)}
-              className="border px-2 py-1 rounded-md"
+              className="border px-2 py-1 rounded-md w-full md:w-auto"
             />
             <button
               onClick={handleFilter}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md"
+              className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md w-full md:w-auto"
             >
               Filtrar
             </button>
-
-            <div className="flex items-center gap-4 self-end">
-              {role === "admin" && <FormModal table="curso" type="create" />}
-            </div>
           </div>
+          <div className="flex items-center gap-4 self-end">
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="bg-lamaSky text-white p-2 rounded-md hover:bg-lamaSkyDark"
+          >
+            Agregar Curso
+          </button>
+        </div>
         </div>
       </div>
       {/* LIST */}
@@ -214,6 +249,27 @@ const ResultListPage = () => {
         currentPage={currentPage}
         onPageChange={(page: number) => setCurrentPage(page)} // Actualiza la página actual
       />
+
+         {/* Modal de creación de profesor */}
+         {isModalOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+          onClick={() => setIsModalOpen(false)}
+        >
+          <div
+            className="bg-white p-6 rounded-md w-2/3"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <CreateCoursePage type={"create"}  table="curso" />
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="mt-4 w-full py-2 bg-red-500 text-white rounded-md"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
