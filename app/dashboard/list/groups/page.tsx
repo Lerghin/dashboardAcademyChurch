@@ -1,6 +1,6 @@
-'use client'
+"use client";
 import { useState, useEffect } from "react";
-import FormModal from "@/app/components/FormModal";
+
 import Pagination from "@/app/components/Pagination";
 import Table from "@/app/components/Table";
 import { API_URL } from "@/app/lib/config";
@@ -8,7 +8,7 @@ import { role } from "@/app/lib/data";
 import Image from "next/image";
 import Link from "next/link";
 import { useAuthStore } from "@/app/store/authStore";
-
+import CreateGroupsPage from "@/app/components/forms/GroupsForm";
 type MiembroList = {
   idMiembro: string;
   cedula: string;
@@ -41,27 +41,48 @@ const columns = [
 const GroupsListPage = () => {
   const [groupsData, setGroupsData] = useState<Groups[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  
+  const [isModalOpen, setIsModalOpen] = useState(false); // Estado para controlar el modal
+
   // Número de grupos por página
   const groupsPerPage = 10;
   const token = useAuthStore((state) => state.getToken()); // Obtener el token usando getToken
   // Inicializa el enrutador para redirigir si no hay token
- 
-   useEffect(() => {
-     if (!token) {
-       window.location.href = "/"; // Redirige a la página de login si no hay token
-     }
-   }, [token]); // Ejecuta el efecto cada vez que el token cambie
+
+  useEffect(() => {
+    if (!token) {
+      window.location.href = "/"; // Redirige a la página de login si no hay token
+    }
+  }, [token]); // Ejecuta el efecto cada vez que el token cambie
   // Obtener los grupos cuando el componente se monta
   useEffect(() => {
     const fetchGroups = async () => {
-      const response = await fetch(`${API_URL}grupo/get`, { cache: "no-store" });
+      const response = await fetch(`${API_URL}grupo/get`, {
+        cache: "no-store",
+      });
       const data: Groups[] = await response.json();
       setGroupsData(data);
     };
 
     fetchGroups();
   }, []);
+
+  const handleDelete = (idGrupo: string) => {
+    const confirmed = window.confirm("¿Estás seguro de que deseas eliminar este grupo?");
+    if (confirmed) {
+      fetch(`${API_URL}grupo/delete/${idGrupo}`, { method: "DELETE" })
+        .then((response) => response.text())
+        .then(() => {
+          alert("Grupo eliminado exitosamente");
+          setGroupsData((prevData) => prevData.filter((group) => group.idGrupo !== idGrupo));
+        })
+        .catch((error) => {
+          console.error("Error al eliminar el grupo", error);
+          alert("Hubo un error al eliminar el grupo");
+        });
+    } else {
+      alert("Eliminación cancelada");
+    }
+  };
 
   // Calcular el rango de grupos a mostrar en base a la página actual
   const indexOfLastGroup = currentPage * groupsPerPage;
@@ -99,7 +120,12 @@ const GroupsListPage = () => {
             </button>
           </Link>
           {role === "admin" && (
-            <FormModal table="grupo" type="delete" id={item.idGrupo} />
+            <button
+              onClick={() => handleDelete(item.idGrupo)}
+              className="w-7 h-7 flex items-center justify-center rounded-full bg-red-500"
+            >
+              <Image src="/delete.png" alt="Eliminar" width={16} height={16} />
+            </button>
           )}
         </div>
       </td>
@@ -110,10 +136,27 @@ const GroupsListPage = () => {
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
       {/* TOP */}
       <div className="flex items-center justify-between">
-        <h1 className="hidden md:block text-lg font-semibold">Todos los Grupos</h1>
+        <h1 className="hidden md:block text-lg font-semibold">
+          Todos los Grupos
+        </h1>
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <div className="flex items-center gap-4 self-end">
-            {role === "admin" && <FormModal table="grupo" type="create" />}
+            {role === "admin" && (
+              <>
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300"
+                >
+                  Agregar
+                </button>
+                {isModalOpen && (
+                  <CreateGroupsPage
+                    type="create"
+                    onClose={() => setIsModalOpen(false)}
+                  />
+                )}
+              </>
+            )}
           </div>
         </div>
       </div>

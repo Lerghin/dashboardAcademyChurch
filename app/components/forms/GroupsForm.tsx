@@ -7,14 +7,23 @@ import { useState, useEffect } from 'react';
 interface CreateGroupsPageProps {
   type: 'create' | 'update'; // Tipo de formulario: crear o editar
   data?: { numeroGrupo: string; miembros: { cedula: string }[] }; // Datos para editar el grupo
+  onClose: () => void; // Función para cerrar el modal
 }
 
-const CreateGroupsPage: React.FC<CreateGroupsPageProps> = ({ type, data }) => {
+interface Student {
+  idMiembro: string;
+  nombre: string;
+  apellido: string;
+  cedula: string;
+}
+
+const CreateGroupsPage: React.FC<CreateGroupsPageProps> = ({ type, data, onClose }) => {
   const [numeroGrupo, setNumeroGrupo] = useState<string>('');
   const [cedula, setCedula] = useState<string>('');
   const [miembroList, setMiembroList] = useState<{ cedula: string }[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [studentsData, setStudentsData] = useState<Student[]>([]);
 
   // Si estamos editando, inicializamos los valores con los datos recibidos
   useEffect(() => {
@@ -24,11 +33,20 @@ const CreateGroupsPage: React.FC<CreateGroupsPageProps> = ({ type, data }) => {
     }
   }, [type, data]);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await fetch(`${API_URL}miembro/get`, { cache: "no-store" });
+      const data: Student[] = await response.json();
+      setStudentsData(data);
+    };
+    fetchData();
+  }, []);
+
   const handleNumeroGrupoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNumeroGrupo(e.target.value);
   };
 
-  const handleCedulaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCedulaChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setCedula(e.target.value);
   };
 
@@ -66,6 +84,7 @@ const CreateGroupsPage: React.FC<CreateGroupsPageProps> = ({ type, data }) => {
       setMiembroList([]);
       setSuccess('Grupo ' + (type === 'update' ? 'actualizado' : 'creado') + ' con éxito');
       setError(null);
+      onClose(); // Cerrar el modal después de crear/actualizar
     } catch (err) {
       console.error(err);
       setError('Hubo un problema al ' + (type === 'update' ? 'actualizar' : 'crear') + ' el grupo');
@@ -74,8 +93,8 @@ const CreateGroupsPage: React.FC<CreateGroupsPageProps> = ({ type, data }) => {
   };
 
   return (
-    <div className="w-full">
-      <div className="max-w-lg mx-auto bg-white shadow-lg rounded-lg overflow-hidden w-full">
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="w-full max-w-lg mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
         <div className="p-6 md:p-8">
           <h2 className="text-2xl font-semibold mb-4 text-blue-700">
             {type === 'update' ? 'Editar Grupo' : 'Crear Nuevo Grupo'}
@@ -97,14 +116,19 @@ const CreateGroupsPage: React.FC<CreateGroupsPageProps> = ({ type, data }) => {
             </div>
 
             <div className="mb-4 flex gap-2">
-              <input
-                type="text"
+              <select
                 name="cedula"
                 value={cedula}
                 onChange={handleCedulaChange}
                 className="p-3 border rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Ingrese la cédula"
-              />
+              >
+                <option value="">Seleccione un miembro</option>
+                {studentsData.map((student) => (
+                  <option key={student.idMiembro} value={student.cedula}>
+                    {student.nombre} {student.apellido} - {student.cedula}
+                  </option>
+                ))}
+              </select>
               <button
                 type="button"
                 onClick={handleAddMember}
@@ -119,7 +143,7 @@ const CreateGroupsPage: React.FC<CreateGroupsPageProps> = ({ type, data }) => {
               <ul className="list-disc pl-5">
                 {miembroList.map((m) => (
                   <li key={m.cedula} className="flex justify-between items-center">
-                    {m.cedula}
+                    {m.cedula} 
                     <button
                       type="button"
                       onClick={() => handleRemoveMember(m.cedula)}
@@ -135,13 +159,10 @@ const CreateGroupsPage: React.FC<CreateGroupsPageProps> = ({ type, data }) => {
             <div className="flex justify-between mt-6">
               <button
                 type="button"
-                onClick={() => {
-                  setNumeroGrupo('');
-                  setMiembroList([]);
-                }}
+                onClick={onClose} // Cerrar el modal al hacer clic en "Cancelar"
                 className="px-6 py-2 bg-gray-400 text-white rounded-md"
               >
-                Limpiar
+                Cancelar
               </button>
               <button
                 type="submit"

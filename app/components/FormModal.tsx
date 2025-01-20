@@ -29,13 +29,13 @@ const CreatePagoModal= dynamic(() => import("./forms/CreatePago"), {
 });
 
 // Tipos permitidos para los formularios
-type TableType = "teacher"  | "group" | "curso" | "events" | "pago";
+type TableType = "teacher"   | "curso" | "events" | "pago";
 
 // Objeto que almacena los formularios
 const forms: { [key in TableType]: (type: "create" | "update", data?: any) => JSX.Element } = {
   teacher: (type, data) => <TeacherForm type={type} data={data} />,
   
-  group: (type, data) => <GroupsForm type={type} data={data} />,
+ 
   curso: (type, data) => <CursoForm type={type} data={data} table="curso" />,
   events: (type, data) => <CreateEventModal type={type} data={data} table="eventos"  />,
   pago: (type, data) => <CreatePagoModal type={type} data={data} table="pago"  />
@@ -56,7 +56,6 @@ const FormModal = ({
     | "profe"
     | "teacher"
     | "student"
-    | "group"
     | "grupo"
     | "subject"
     | "class"
@@ -119,7 +118,7 @@ const FormModal = ({
   const Form = () => {
     const validTables: TableType[] = [
       "teacher",
-      "group",
+      
       "curso",
       "events",
       "pago",
