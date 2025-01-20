@@ -1,7 +1,7 @@
 import { useAuthStore } from '../store/authStore';
 
-export const API_URL = "https://iglesiaproyecto.onrender.com/";
-//export const API_URL = "http://localhost:8080/";
+//export const API_URL = "https://iglesiaproyecto.onrender.com/";
+export const API_URL = "http://localhost:8080/";
 export const getAuthHeaders = () => {
   const token = useAuthStore.getState().getToken(); // Obtener el token usando getToken
   return {

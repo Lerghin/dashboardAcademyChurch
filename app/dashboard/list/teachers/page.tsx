@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
 import { useState, useEffect } from "react";
 import Table from "@/app/components/Table";
 import Pagination from "@/app/components/Pagination";
 import { API_URL } from "@/app/lib/config";
 import { useAuthStore } from "@/app/store/authStore";
-import FormModal from "@/app/components/FormModal";
 import Image from "next/image";
-import Link from "next/link"
+import Link from "next/link";
+import TeacherForm from "@/app/components/forms/TeacherForm";
 
 type Teacher = {
   idProfessor: string;
@@ -26,7 +26,11 @@ const columns = [
   { header: "Cedula", accessor: "cedula", className: "hidden md:table-cell" },
   { header: "Cursos", accessor: "cursos", className: "hidden lg:table-cell" },
   { header: "Telefono", accessor: "phone", className: "hidden lg:table-cell" },
-  { header: "Direccion", accessor: "direccion", className: "hidden lg:table-cell" },
+  {
+    header: "Direccion",
+    accessor: "direccion",
+    className: "hidden lg:table-cell",
+  },
   { header: "Actions", accessor: "action" },
 ];
 
@@ -37,15 +41,17 @@ const TeacherListPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState(""); // Término de búsqueda
+  const [isModalOpen, setIsModalOpen] = useState(false); // Estado para el modal
 
   const token = useAuthStore((state) => state.getToken()); // Obtener el token usando getToken
- // Inicializa el enrutador para redirigir si no hay token
+  // Inicializa el enrutador para redirigir si no hay token
 
   useEffect(() => {
     if (!token) {
       window.location.href = "/"; // Redirige a la página de login si no hay token
     }
   }, [token]); // Ejecuta el efecto cada vez que el token cambie
+
   // Obtener los datos de la API
   const fetchTeachers = async () => {
     try {
@@ -66,7 +72,9 @@ const TeacherListPage = () => {
 
   // Filtrar los datos en función del término de búsqueda
   const filteredTeachersData = teachersData.filter((teacher) =>
-    `${teacher.name} ${teacher.lastName} ${teacher.cedula}`.toLowerCase().includes(searchTerm.toLowerCase())
+    `${teacher.name} ${teacher.lastName} ${teacher.cedula}`
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
   );
 
   // Calcular los datos de la página actual para mostrar
@@ -85,30 +93,34 @@ const TeacherListPage = () => {
     setCurrentPage(1); // Volver a la primera página cuando se cambia el término de búsqueda
   };
 
+  const handleDelete = (idProfessor: string) => {
+    const confirmed = window.confirm(
+      "¿Estás seguro de que deseas eliminar este profesor?"
+    );
+    if (confirmed) {
+      // Lógica para eliminar el profesor
+      alert("Profesor eliminado");
+      // Recargar la página actual
+      window.location.reload();
+      fetch(`${API_URL}profe/delete/${idProfessor}`, { method: "DELETE" })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            alert("Profesor eliminado exitosamente");
+          }
+        })
+        .catch((error) =>
+          console.error("Error al eliminar el profesor", error)
+        );
+    } else {
+      alert("Eliminación cancelada");
+    }
+  };
 
-  // Aquí está la parte donde manejas el tipo de acción delete
-const handleDelete = (idProfessor: string) => {
-  const confirmed = window.confirm("¿Estás seguro de que deseas eliminar este profesor?");
-  if (confirmed) {
-    // Aquí va tu lógica para eliminar el profesor
-   
-   alert("Profesor eliminado");
-  // reload the current page
-    window.location.reload();
-
-    // Llama a la API para eliminar o elimina de los datos locales
-    fetch(`${API_URL}profe/delete/${idProfessor}`, { method: "DELETE" })
-      .then(response => response.json())
-    .then(data => {
-       if (data.success) {
-         alert("Profesor eliminado exitosamente");
-       }
-      })
-      .catch(error => console.error("Error al eliminar el profesor", error));
-  } else {
-    alert("Eliminación cancelada");
-  }
-};
+  const handleSave = () => {
+    setIsModalOpen(false);
+    fetchTeachers(); // Recargar la lista de profesores después de guardar
+  };
 
   const renderRow = (item: Teacher) => (
     <tr
@@ -129,17 +141,17 @@ const handleDelete = (idProfessor: string) => {
       <td className="hidden md:table-cell px-4">{item.address}</td>
       <td>
         <div className="flex items-center gap-2">
-        <Link href={`/dashboard/list/teachers/${item.idProfessor}`}>
+          <Link href={`/dashboard/list/teachers/${item.idProfessor}`}>
             <button className="w-7 h-7 flex items-center justify-center rounded-full bg-lamaSky">
               <Image src="/view.png" alt="" width={16} height={16} />
             </button>
           </Link>
           <button
-          onClick={() => handleDelete(item.idProfessor)}
-          className="w-7 h-7 flex items-center justify-center rounded-full bg-red-500"
-        >
-          <Image src="/delete.png" alt="Eliminar" width={16} height={16} />
-        </button>
+            onClick={() => handleDelete(item.idProfessor)}
+            className="w-7 h-7 flex items-center justify-center rounded-full bg-red-500"
+          >
+            <Image src="/delete.png" alt="Eliminar" width={16} height={16} />
+          </button>
         </div>
       </td>
     </tr>
@@ -148,7 +160,9 @@ const handleDelete = (idProfessor: string) => {
   return (
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="hidden md:block text-lg font-semibold">Todos los Profesores</h1>
+        <h1 className="hidden md:block text-lg font-semibold">
+          Todos los Profesores
+        </h1>
 
         {/* Campo de búsqueda */}
         <div className="flex items-center">
@@ -161,15 +175,21 @@ const handleDelete = (idProfessor: string) => {
           />
         </div>
         <div className="flex items-center gap-4 self-end">
-            
-              <FormModal table="teacher" type="create" />
-          
-          </div>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="bg-lamaSky text-white p-2 rounded-md hover:bg-lamaSkyDark"
+          >
+            Agregar Profesor
+          </button>
+        </div>
       </div>
 
       {/* Tabla con datos paginados */}
-      <Table columns={columns} renderRow={renderRow} data={getPaginatedData()} />
-
+      <Table
+        columns={columns}
+        renderRow={renderRow}
+        data={getPaginatedData()}
+      />
 
       {/* Componente de paginación */}
       <Pagination
@@ -177,6 +197,27 @@ const handleDelete = (idProfessor: string) => {
         currentPage={currentPage}
         onPageChange={handlePageChange}
       />
+
+      {/* Modal de creación de profesor */}
+      {isModalOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+          onClick={() => setIsModalOpen(false)}
+        >
+          <div
+            className="bg-white p-6 rounded-md w-96"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <TeacherForm type={"create"} onClose={() => setIsModalOpen(false)} onSave={handleSave} />
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="mt-4 w-full py-2 bg-red-500 text-white rounded-md"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

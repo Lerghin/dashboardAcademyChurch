@@ -41,7 +41,8 @@ const forms: { [key in TableType]: (type: "create" | "update", data?: any) => JS
   pago: (type, data) => <CreatePagoModal type={type} data={data} table="pago"  />
 };
 
-// Componente modal de formularios
+// FormModal
+
 const FormModal = ({
   table,
   type,
@@ -81,45 +82,39 @@ const FormModal = ({
   const [open, setOpen] = useState(false);
   const [getEventPayload, setGetEventPayload] = useState<() => any>(() => () => ({}));
 
-
   // Maneja la eliminación de un registro
   const handleDelete = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault(); // Prevenir comportamiento predeterminado
     try {
       const response = await deleteData(`${table}/delete/${id}`);
-      const data= response;
+      const data = response;
       alert("Eliminado correctamente");
       window.location.reload();
-      
       setOpen(false);
-      // Cierra el modal tras la eliminación
-      // Aquí podrías actualizar el estado local para eliminar el elemento sin recargar
     } catch (err: any) {
       console.error("Error:", err.message || err);
     }
   };
 
+  // Maneja la creación o actualización de un registro
+  const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault(); // Prevenir la recarga de la página
+    try {
+      const newData = {
+        ...data,
+      };
+      console.log(newData);
+      const response = type === "update"
+        ? await putData(`${table}/${id}`, newData)
+        : await postData(`${table}/create`, newData);
 
-    // Maneja la creación o actualización de un registro
-    const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      try {
-        const newData = {
-  
-          ...data,
-        };
-        console.log(newData);
-        const response = type === "update"
-          ? await putData(`${table}/${id}`, newData)
-          : await postData(`${table}/create`, newData);
-       
-   
-        setOpen(false); // Cierra el modal tras la operación
-        // Aquí podrías actualizar el estado local para reflejar los cambios sin recargar
-      } catch (err: any) {
-        console.error("Error:", err.message || err);
-      }
-    };
+      setOpen(false); // Cierra el modal tras la operación
+      // Aquí podrías actualizar el estado local para reflejar los cambios sin recargar
+    } catch (err: any) {
+      console.error("Error:", err.message || err);
+    }
+  };
+
   // Verifica si la tabla es válida antes de mostrar el formulario
   const Form = () => {
     const validTables: TableType[] = [
@@ -145,7 +140,7 @@ const FormModal = ({
             className="bg-red-700 text-white py-2 px-4 rounded-md border-none w-max self-center"
             onClick={handleDelete}
           >
-            Delete
+            Eliminar
           </button>
         </form>
       );
@@ -155,12 +150,7 @@ const FormModal = ({
       return (
         <form onSubmit={handleSave} className="p-4 flex flex-col gap-4">
           {forms[table as TableType](type, data)}
-          <button
-            type="submit"
-            className="bg-blue-500 text-white py-2 px-4 rounded-md border-none w-max self-center"
-          >
-            {type === "create" ? "Crear" : "Actualizar"}
-          </button>
+          {/* Eliminar el botón submit dentro del formulario */}
         </form>
       );
     }
@@ -194,3 +184,4 @@ const FormModal = ({
 };
 
 export default FormModal;
+

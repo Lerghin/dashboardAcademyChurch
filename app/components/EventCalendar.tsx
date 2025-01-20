@@ -26,30 +26,25 @@ const EventCalendar = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await fetch(`${API_URL}events/get`);
+        if (!API_URL) {
+          throw new Error("API_URL is not defined");
+        }
+
+        const response = await fetch(`${API_URL}events/get/30`);
         if (!response.ok) {
           throw new Error("Error fetching events");
         }
         const data = await response.json();
 
-        // Filtrar los eventos para que solo queden los que están entre hoy y dentro de 30 días
-        const today = new Date();
-        const next30Days = new Date(today);
-        next30Days.setDate(today.getDate() + 30); // Establece el límite de 30 días
-
-        const filteredEvents = data.filter((event: Event) => {
-          const eventDate = new Date(event.fecha_inicio);
-          return eventDate >= today && eventDate <= next30Days; // Filtra eventos en el rango de 30 días
-        });
-
-        setEvents(filteredEvents);
+        // No filtramos los eventos, los traemos todos
+        setEvents(data);
       } catch (error) {
         console.error("Error fetching events:", error);
       }
     };
 
     fetchEvents();
-  }, []);
+  }, []); // Empty dependency array to only run once on mount
 
   return (
     <div className="bg-white p-4 rounded-md">
