@@ -8,6 +8,7 @@ import { role } from "@/app/lib/data";
 import Image from "next/image";
 import Link from "next/link";
 import { useAuthStore } from "@/app/store/authStore";
+import CreatePagoModal from "@/app/components/forms/CreatePago";
 
 type Miembro = {
   idMiembro: string;
@@ -84,6 +85,7 @@ const PagoListPage = () => {
   });
 
   const [filteredData, setFilteredData] = useState<Pago[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Obtener los pagos cuando el componente se monta
   useEffect(() => {
@@ -149,6 +151,33 @@ const PagoListPage = () => {
 
   const totalPages = Math.ceil(filteredData.length / pagosPerPage);
 
+  const handleDelete = (idPago: string) => {
+    const confirmed = window.confirm(
+      "¿Estás seguro de que deseas eliminar este pago?"
+    );
+    if (confirmed) {
+      fetch(`${API_URL}pago/delete/${idPago}`, { method: "DELETE" })
+        .then((response) => {
+          if (response.ok) {
+            alert("Pago eliminado exitosamente");
+            setPagosData((prevPagos) => prevPagos.filter((pago) => pago.idPago !== idPago));
+            setFilteredData((prevFiltered) => prevFiltered.filter((pago) => pago.idPago !== idPago));
+          } else {
+            // Si la respuesta no es exitosa
+            alert("Hubo un problema al eliminar el pago");
+            console.error(`Error al eliminar el pago: ${response.statusText}`);
+          }
+        })
+        .catch((error) => {
+          console.error("Error al eliminar el pago", error);
+          alert("Error al intentar eliminar el pago. Por favor, intenta nuevamente.");
+        });
+    } else {
+      alert("Eliminación cancelada");
+    }
+  };
+  
+
   const renderRow = (item: Pago) => (
     <tr
       key={item.idPago}
@@ -173,6 +202,12 @@ const PagoListPage = () => {
               <Image src="/view.png" alt="" width={16} height={16} />
             </button>
           </Link>
+          <button
+            onClick={() => handleDelete(item.idPago)}
+            className="w-7 h-7 flex items-center justify-center rounded-full bg-red-500"
+          >
+            <Image src="/delete.png" alt="Eliminar" width={16} height={16} />
+          </button>
         </div>
       </td>
     </tr>
@@ -215,6 +250,14 @@ const PagoListPage = () => {
             value={filters.cedula}
             onChange={handleFilterChange}
           />
+           {role === "admin" && (
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="bg-lamaSky text-white p-2 rounded-md"
+            >
+              Agregar Pago 
+            </button>
+          )}
         </div>
       </div>
       
@@ -227,6 +270,22 @@ const PagoListPage = () => {
         currentPage={currentPage}
         onPageChange={(page: number) => setCurrentPage(page)}
       />
+       {isModalOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+          onClick={() => setIsModalOpen(false)}
+        >
+          <div className="bg-white p-6 rounded-md w-96" onClick={(e) => e.stopPropagation()}>
+           <CreatePagoModal type={"create"}  onClose={() => setIsModalOpen(false)} />
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="mt-4 w-full py-2 bg-red-500 text-white rounded-md"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

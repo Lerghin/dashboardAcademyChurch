@@ -18,6 +18,12 @@ interface Pago {
   monto: number;
 }
 
+interface Miembro {
+  cedula: string;
+  nombre: string;
+  apellido: string;
+}
+
 export default function PagoDetail() {
   const { id } = useParams();
   const [pago, setPago] = useState<Pago | null>(null);
@@ -31,6 +37,7 @@ export default function PagoDetail() {
     observacion: '',
     monto: 0,
   });
+  const [miembros, setMiembros] = useState<Miembro[]>([]);
 
   // Obtener los datos del pago por ID
   useEffect(() => {
@@ -50,11 +57,21 @@ export default function PagoDetail() {
     fetchData();
   }, [id]);
 
+  // Obtener todos los miembros
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await fetch(`${API_URL}miembro/get`, { cache: "no-store" });
+      const data: Miembro[] = await response.json();
+      setMiembros(data);
+    };
+    fetchData();
+  }, []);
+
   if (error) return <p>Error: {error}</p>;
   if (!formData.fecha_pago) return <p>Cargando...</p>;
 
   // Manejo del formulario de edición
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -128,15 +145,20 @@ export default function PagoDetail() {
             <h1 className="text-2xl font-semibold text-blue-700 mb-4">
               Editar Pago
             </h1>
-            <input
-              type="text"
+            <select
               name="cedula"
               value={formData.cedula}
               onChange={handleInputChange}
               className="w-full mb-4 p-2 border rounded-md"
-              placeholder="Cédula del Miembro"
               required
-            />
+            >
+              <option value="">Seleccione un miembro</option>
+              {miembros.map((miembro) => (
+                <option key={miembro.cedula} value={miembro.cedula}>
+                  {miembro.nombre} {miembro.apellido} - C.I. {miembro.cedula}
+                </option>
+              ))}
+            </select>
             <input
               type="date"
               name="fecha_pago"
@@ -145,15 +167,20 @@ export default function PagoDetail() {
               className="w-full mb-4 p-2 border rounded-md"
               required
             />
-            <input
-              type="text"
+            <select
               name="metodoPago"
               value={formData.metodoPago}
               onChange={handleInputChange}
               className="w-full mb-4 p-2 border rounded-md"
-              placeholder="Método de Pago"
               required
-            />
+            >
+              <option value="">Seleccione un método de pago</option>
+              <option value="Efectivo">Efectivo</option>
+              <option value="Transferencia">Transferencia</option>
+              <option value="Pago Movil">Pago Movil</option>
+              <option value="Zelle">Zelle</option>
+              <option value="Binance">Binance</option>
+            </select>
             <input
               type="text"
               name="referencia"

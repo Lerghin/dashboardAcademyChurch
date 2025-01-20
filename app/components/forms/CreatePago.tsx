@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { API_URL } from "@/app/lib/config";
 // Interfaz de las props
 interface FormProps {
-  table: string;
+
   type: "create" | "update";  // Specify valid types here
   data?: any;
-  
+  onClose: () => void; // Agregar propiedad onClose
 }
 
 
@@ -20,9 +20,11 @@ interface Pago {
 
 interface Miembro {
   cedula: string;
+  nombre: string;
+  apellido: string;
 }
 
-const CreatePagoModal: React.FC<FormProps> = ({ table, type, data }) => {
+const CreatePagoModal: React.FC<FormProps> = ({  type, data, onClose }) => {
   // Definir el estado de los campos del formulario
   const [cedula, setCedula] = useState<string>(data?.miembro?.cedula || "");
   const [fecha_pago, setFechaPago] = useState<string>(data?.fecha_pago || "");
@@ -30,11 +32,12 @@ const CreatePagoModal: React.FC<FormProps> = ({ table, type, data }) => {
   const [referencia, setReferencia] = useState<string>(data?.referencia || "");
   const [observacion, setObservacion] = useState<string>(data?.observacion || "");
   const [monto, setMonto] = useState<number>(data?.monto || 0);
+  const [miembros, setMiembros] = useState<Miembro[]>([]);
 
   // Manejar el envío del formulario
   const handleSubmit = async () => {
     const pagoPayload: Pago = {
-      miembro: { cedula },
+      miembro: { cedula, nombre: "", apellido: "" },
       fecha_pago,
       metodoPago,
       referencia,
@@ -54,6 +57,10 @@ const CreatePagoModal: React.FC<FormProps> = ({ table, type, data }) => {
       }
 
       const savedPago = await response.text();
+      
+      onClose();
+      alert('Pago guardado exitosamente')
+      window.location.reload();
        // Cerrar el modal
     } catch (err) {
       if (err instanceof Error) {
@@ -63,6 +70,15 @@ const CreatePagoModal: React.FC<FormProps> = ({ table, type, data }) => {
       }
     }
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await fetch(`${API_URL}miembro/get`, { cache: "no-store" });
+      const data: Miembro[] = await response.json();
+      setMiembros(data);
+    };
+    fetchData();
+  }, []);
 
   useEffect(() => {
     // Si el tipo es editar, establecer los datos del pago en los estados
@@ -83,12 +99,18 @@ const CreatePagoModal: React.FC<FormProps> = ({ table, type, data }) => {
 
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700">Cédula del Miembro</label>
-          <input
-            type="text"
+          <select
             value={cedula}
             onChange={(e) => setCedula(e.target.value)}
             className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md"
-          />
+          >
+            <option value="">Seleccione un miembro</option>
+            {miembros.map((miembro) => (
+              <option key={miembro.cedula} value={miembro.cedula}>
+                {miembro.nombre} {miembro.apellido} - {miembro.cedula}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="mb-4">
@@ -103,12 +125,18 @@ const CreatePagoModal: React.FC<FormProps> = ({ table, type, data }) => {
 
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700">Método de Pago</label>
-          <input
-            type="text"
+          <select
             value={metodoPago}
             onChange={(e) => setMetodoPago(e.target.value)}
             className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md"
-          />
+          >
+            <option value="">Seleccione un método de pago</option>
+            <option value="Efectivo">Efectivo</option>
+            <option value="Transferencia">Transferencia</option>
+            <option value="Pago Movil">Pago Movil</option>
+            <option value="Zelle">Zelle</option>
+            <option value="Binance">Binance</option>
+          </select>
         </div>
 
         <div className="mb-4">
@@ -142,7 +170,7 @@ const CreatePagoModal: React.FC<FormProps> = ({ table, type, data }) => {
 
         <div className="flex justify-between">
           <button
-           // Usar onClose para cerrar el modal
+            onClick={onClose} // Usar onClose para cerrar el modal
             className="px-4 py-2 bg-gray-300 rounded-md text-gray-700 hover:bg-gray-400"
           >
             Cancelar

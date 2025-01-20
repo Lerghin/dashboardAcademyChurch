@@ -12,6 +12,7 @@ const Navbar = () => {
     const token = useAuthStore((state) => state.token);
     //console.log(token)
     const isTokenReady = useAuthStore((state) => state.isTokenReady);
+    
 
     useEffect(() => {
         // Ejecutar solo si el token está listo
@@ -31,6 +32,8 @@ const Navbar = () => {
                 });
 
                 if (!response.ok) {
+                    alert("Debe loguearse nuevamente");
+                    window.location.href = '/';
                     throw new Error("Error al obtener el nombre de usuario");
                 }
 
